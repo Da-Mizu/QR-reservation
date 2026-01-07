@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { encrypt, decrypt } = require('./encryption');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -123,6 +124,11 @@ app.post('/api/commandes', (req, res) => {
 
   const id = uuidv4();
   const itemsJson = JSON.stringify(items);
+  // Chiffrer les champs sensibles avant insertion
+  const nomEnc = encrypt(nom);
+  const emailEnc = email ? encrypt(email) : null;
+  const telephoneEnc = telephone ? encrypt(telephone) : null;
+  const itemsEnc = encrypt(itemsJson);
   
   console.log('Valeurs à insérer:', {
     id,
@@ -136,7 +142,7 @@ app.post('/api/commandes', (req, res) => {
   
   db.run(
     "INSERT INTO commandes (id, nom, email, telephone, table_number, items, total, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [id, nom, email || null, telephone || null, table_number || null, itemsJson, total, 'en_attente'],
+    [id, nomEnc, emailEnc, telephoneEnc, table_number || null, itemsEnc, total, 'en_attente'],
     function(err) {
       if (err) {
         console.error('Erreur lors de l\'insertion:', err);
@@ -158,9 +164,23 @@ app.get('/api/commandes', (req, res) => {
     }
     // Parser les items JSON
     const commandes = rows.map(row => {
+      const decryptedNom = row.nom ? decrypt(row.nom) : null;
+      const decryptedEmail = row.email ? decrypt(row.email) : null;
+      const decryptedTelephone = row.telephone ? decrypt(row.telephone) : null;
+      const itemsStr = row.items ? decrypt(row.items) : '[]';
+      let itemsParsed = [];
+      try {
+        itemsParsed = JSON.parse(itemsStr);
+      } catch (e) {
+        itemsParsed = [];
+      }
+
       const commande = {
         ...row,
-        items: JSON.parse(row.items),
+        nom: decryptedNom,
+        email: decryptedEmail,
+        telephone: decryptedTelephone,
+        items: itemsParsed,
         table_number: row.table_number || null
       };
       // Debug: vérifier les données
@@ -186,9 +206,23 @@ app.get('/api/commandes/:id', (req, res) => {
       res.status(404).json({ error: 'Commande non trouvée' });
       return;
     }
+    const decryptedNom = row.nom ? decrypt(row.nom) : null;
+    const decryptedEmail = row.email ? decrypt(row.email) : null;
+    const decryptedTelephone = row.telephone ? decrypt(row.telephone) : null;
+    const itemsStr = row.items ? decrypt(row.items) : '[]';
+    let itemsParsed = [];
+    try {
+      itemsParsed = JSON.parse(itemsStr);
+    } catch (e) {
+      itemsParsed = [];
+    }
+
     res.json({
       ...row,
-      items: JSON.parse(row.items)
+      nom: decryptedNom,
+      email: decryptedEmail,
+      telephone: decryptedTelephone,
+      items: itemsParsed
     });
   });
 });
@@ -319,7 +353,8 @@ app.get('/api/stats/produits', (req, res) => {
     
     rows.forEach(row => {
       try {
-        const items = JSON.parse(row.items);
+        const itemsStr = row.items ? decrypt(row.items) : '[]';
+        const items = JSON.parse(itemsStr);
         items.forEach(item => {
           const key = `${item.id}_${item.nom}`;
           if (!produitsStats[key]) {

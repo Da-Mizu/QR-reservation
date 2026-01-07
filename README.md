@@ -138,6 +138,31 @@ Les produits sont stockés dans la base de données SQLite. Vous pouvez :
 - Le panier est sauvegardé dans le localStorage du navigateur
 - L'auto-refresh est activé par défaut dans l'interface admin (rafraîchit toutes les 5 secondes)
 
+### Base de données (SQLite) et chiffrement à froid
+
+- **Fichier de la base de données :** le fichier SQLite est créé dans le dossier `backend` sous le nom `database.sqlite` (chemin : `backend/database.sqlite`). Le backend l'ouvre via `path.join(__dirname, 'database.sqlite')` dans `backend/server.js`.
+- **Chiffrement à froid (optionnel) :** une couche d'encryptage applicatif a été ajoutée pour chiffrer certains champs sensibles avant écriture (ex. `nom`, `email`, `telephone`, `items`).
+- **Variable d'environnement :** pour activer le chiffrement définissez `DB_ENCRYPTION_KEY`. Recommandation : une clé 32-octets encodée en base64.
+
+   - Générer une clé 32-octets (Node.js) :
+      ```bash
+      node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+      ```
+
+   - Exemple (PowerShell) :
+      ```powershell
+      $env:DB_ENCRYPTION_KEY = '<votre_cle_base64>'
+      npm start
+      ```
+
+   - Exemple (Linux / macOS) :
+      ```bash
+      export DB_ENCRYPTION_KEY='<votre_cle_base64>'
+      npm start
+      ```
+
+- **Comportement si non défini :** si `DB_ENCRYPTION_KEY` n'est pas défini, le chiffrement est désactivé et une alerte est affichée au démarrage. Le système est rétro-compatible : les valeurs non préfixées restent lisibles.
+
 ## 🔒 Sécurité
 
 ⚠️ **Note importante** : Cette application est conçue pour un usage en développement ou dans un environnement contrôlé. Pour un déploiement en production, considérez :
