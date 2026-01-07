@@ -1,0 +1,15 @@
+{
+  "name": "qr-reservation",
+  "version": "1.0.0",
+  "description": "Système de réservation et commande par QR code",
+  "scripts": {
+    "install-all": "cd backend && npm install && cd ../frontend-client && npm install && cd ../frontend-admin && npm install",
+    "start:backend": "cd backend && npm start",
+    "start:client": "cd frontend-client && npm start",
+    "start:admin": "cd frontend-admin && npm start",
+    "dev:backend": "cd backend && npm run dev"
+  },
+  "keywords": ["qr", "reservation", "restaurant", "commande"],
+  "author": "",
+  "license": "ISC"
+}
