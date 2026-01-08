@@ -111,10 +111,10 @@ npm start
 5) Admin : connexion, visualisation des commandes filtrées par restaurant (token), statistiques.
 
 ## Scripts utiles (PowerShell)
-- `test-login.ps1` : vérifie l'auth login.
-- `test-auth.ps1` : login, verify, commandes, stats.
-- `test-commande-restaurant.ps1` : crée une commande pour restaurant 1.
-- `test-commande-restaurant-2.ps1` : crée une commande pour restaurant 2.
+- `scripts/ps1/test-login.ps1` : vérifie l'auth login.
+- `scripts/ps1/test-auth.ps1` : login, verify, commandes, stats.
+- `scripts/ps1/test-commande-restaurant.ps1` : crée une commande pour restaurant 1.
+- `scripts/ps1/test-commande-restaurant-2.ps1` : crée une commande pour restaurant 2.
 
 ## Configuration
 - Backend : voir `CONFIGURATION.md` pour les variables DB (DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME).

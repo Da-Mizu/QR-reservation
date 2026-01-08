@@ -56,8 +56,8 @@ Ports configurables via `.env` (PORT=3002 admin, PORT=3003 client).
 4) Vérifier dans l'admin (port 3002) que la commande apparaît pour le bon restaurant.
 
 ## Scripts de test (PowerShell)
-- `test-login.ps1` : login
-- `test-auth.ps1` : login + verify + commandes + stats
-- `test-commande-restaurant.ps1` : commande resto 1
-- `test-commande-restaurant-2.ps1` : commande resto 2
+- `scripts/ps1/test-login.ps1` : login
+- `scripts/ps1/test-auth.ps1` : login + verify + commandes + stats
+- `scripts/ps1/test-commande-restaurant.ps1` : commande resto 1
+- `scripts/ps1/test-commande-restaurant-2.ps1` : commande resto 2
 

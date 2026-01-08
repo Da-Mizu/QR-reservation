@@ -29,7 +29,7 @@
 
 ## Outils et scripts
 - Génération QR : `generate-qr.html`.
-- Tests : `test-login.ps1`, `test-auth.ps1`, `test-commande-restaurant.ps1`, `test-commande-restaurant-2.ps1`.
+- Tests : `scripts/ps1/test-login.ps1`, `scripts/ps1/test-auth.ps1`, `scripts/ps1/test-commande-restaurant.ps1`, `scripts/ps1/test-commande-restaurant-2.ps1`.
 ```
 
 ---
