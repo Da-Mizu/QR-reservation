@@ -9,8 +9,8 @@
   user-select: none;
 }
 
-.table-map-container:active {
-  cursor: grabbing;
+.table-map-container.locked {
+  cursor: default;
 }
 
 .table-map-canvas {
@@ -39,6 +39,11 @@
   font-weight: bold;
   user-select: none;
   transform: translateX(-50%) translateY(-50%);
+}
+
+.table-item.locked {
+  cursor: default;
+  opacity: 0.8;
 }
 
 .table-item:hover {

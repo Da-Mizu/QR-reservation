@@ -233,6 +233,14 @@ try {
             respond($row);
         }
 
+        if ($method === 'PATCH' && isset($parts[2]) && isset($parts[3]) && $parts[3] === 'liberer') {
+            // Libérer une table (vider table_number)
+            $stmt = $pdo->prepare('UPDATE commandes SET table_number = NULL WHERE id = ? AND restaurant_id = ?');
+            $stmt->execute([$parts[2], $restaurantId]);
+            if ($stmt->rowCount() === 0) respond(['error' => 'Commande non trouvée'], 404);
+            respond(['message' => 'Table libérée avec succès']);
+        }
+
         if ($method === 'PATCH' && isset($parts[2]) && isset($parts[3]) && $parts[3] === 'statut') {
             $data = json_input();
             $statut = $data['statut'] ?? null;
@@ -243,6 +251,7 @@ try {
             if ($stmt->rowCount() === 0) respond(['error' => 'Commande non trouvée'], 404);
             respond(['message' => 'Statut mis à jour avec succès']);
         }
+
     }
 
     // Stats

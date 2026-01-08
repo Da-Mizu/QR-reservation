@@ -43,6 +43,8 @@ function TableMap() {
   const [panY, setPanY] = useState(0);
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [isLocked, setIsLocked] = useState(true);
   const containerRef = useRef(null);
   const { token } = useContext(AuthContext);
 
@@ -50,7 +52,14 @@ function TableMap() {
   useEffect(() => {
     chargerCommandes();
     chargerTables();
-  }, [token]);
+    let interval;
+    if (autoRefresh) {
+      interval = setInterval(chargerCommandes, 5000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [autoRefresh, token]);
 
   const chargerCommandes = async () => {
     try {
@@ -106,11 +115,59 @@ function TableMap() {
   };
 
   const supprimerTable = (tableId) => {
+    if (isLocked) {
+      alert('Impossible de supprimer une table quand le plan est verrouillé');
+      return;
+    }
     const updatedTables = tables.filter(t => t.id !== tableId);
     saveTables(updatedTables);
   };
 
+  const incrementerStatut = async (tableNumber) => {
+    const commande = commandes.find(c => String(c.table_number) === String(tableNumber));
+    
+    if (!commande) {
+      alert('Aucune commande associée à cette table');
+      return;
+    }
+
+    console.log('Commande trouvée:', commande);
+    console.log('Statut de la commande:', commande.statut);
+
+    // Définir la progression des statuts
+    const progressionStatuts = {
+      'en_attente': 'en_preparation',
+      'en_preparation': 'prete',
+      'prete': 'terminee',
+      'terminee': null, // Ne rien faire
+      'annulee': null // Ne rien faire
+    };
+
+    const nouveauStatut = progressionStatuts[commande.statut];
+
+    if (!nouveauStatut) {
+      alert(`Impossible de changer l'état de la commande (état actuel: ${getStatusLabel(commande.statut)})`);
+      return;
+    }
+
+    try {
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      console.log('Appel endpoint statut pour commande:', commande.id, 'nouveau statut:', nouveauStatut);
+      const response = await axios.patch(`${API_URL}/commandes/${commande.id}/statut`, 
+        { statut: nouveauStatut }, 
+        config
+      );
+      console.log('Réponse:', response);
+      chargerCommandes();
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      alert('Erreur lors de la mise à jour du statut');
+    }
+  };
+
+
   const deplacerTable = (tableId, newX, newY) => {
+    if (isLocked) return; // Empêcher le déplacement si verrouillé
     const updatedTables = tables.map(t =>
       t.id === tableId ? { ...t, x: newX, y: newY } : t
     );
@@ -174,7 +231,10 @@ function TableMap() {
   };
 
   const handleTableMouseDown = (e, tableId) => {
-    if (e.button === 0) {
+    if (isLocked) return; // Ne pas déplacer si verrouillé
+    
+    if (e.button === 0 && e.detail === 1) {
+      // Single click only, ignore double click
       const rect = containerRef.current.getBoundingClientRect();
       const startX = (e.clientX - rect.left - panX) / scale;
       const startY = (e.clientY - rect.top - panY) / scale;
@@ -225,22 +285,35 @@ function TableMap() {
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="gap-2">
               <Button 
-                variant="primary" 
+                variant={autoRefresh ? 'success' : 'secondary'}
                 size="sm"
-                onClick={() => setShowAddTable(true)}
+                onClick={() => setAutoRefresh(!autoRefresh)}
               >
-                ➕ Ajouter Table
+                {autoRefresh ? 'Auto ✓' : 'Auto ✗'}
               </Button>
               <Button 
-                variant="info" 
+                variant={isLocked ? 'danger' : 'warning'}
+                size="sm"
+                onClick={() => setIsLocked(!isLocked)}
+                title={isLocked ? 'Plan verrouillé' : 'Plan déverrouillé'}
+              >
+                {isLocked ? '🔒 Verrouillé' : '🔓 Déverrouillé'}
+              </Button>
+              <Button 
+                variant="primary" 
                 size="sm"
                 onClick={() => chargerCommandes()}
               >
                 🔄 Actualiser
               </Button>
-              <Link to="/" className="btn btn-outline-secondary btn-sm">
-                ← Retour
-              </Link>
+              <Button 
+                variant="primary" 
+                size="sm"
+                onClick={() => setShowAddTable(true)}
+                disabled={isLocked}
+              >
+                ➕ Ajouter Table
+              </Button>
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -273,15 +346,24 @@ function TableMap() {
             return (
               <div
                 key={table.id}
-                className="table-item"
+                className={`table-item ${isLocked ? 'locked' : ''}`}
                 style={{
                   left: `${table.x}px`,
                   top: `${table.y}px`,
                   backgroundColor: backgroundColor,
-                  cursor: 'grab',
+                  cursor: isLocked ? 'default' : 'grab',
                 }}
-                onMouseDown={(e) => handleTableMouseDown(e, table.id)}
-                title={`Table ${table.number} - ${getStatusLabel(status)}`}
+                onMouseDown={(e) => {
+                  if (e.button === 0 && e.detail === 2) {
+                    // Double click - incrementer statut
+                    e.stopPropagation();
+                    incrementerStatut(table.number);
+                  } else if (e.button === 0 && e.detail === 1) {
+                    // Single click - drag table
+                    handleTableMouseDown(e, table.id);
+                  }
+                }}
+                title={`Table ${table.number} - ${getStatusLabel(status)} (Double-clic pour passer à l'étape suivante)`}
               >
                 <div className="table-number">{table.number}</div>
                 {status && <div className="table-status">{getStatusLabel(status).charAt(0)}</div>}
