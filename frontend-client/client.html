@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QR Reservation - Client</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:16px}
+    .prod{border:1px solid #ddd;padding:8px;margin:8px;border-radius:6px}
+    .grid{display:flex;flex-wrap:wrap}
+    .prod button{margin-top:8px}
+    #cart{position:fixed;right:16px;top:16px;width:300px;background:#fff;border:1px solid #ccc;padding:12px;border-radius:6px}
+    #orderMsg{margin-top:8px;color:green}
+    label{display:block;margin-top:6px}
+    input,textarea{width:100%;box-sizing:border-box;padding:6px}
+  </style>
+</head>
+<body>
+  <h1>Menu</h1>
+  <div id="products" class="grid">Chargement...</div>
+
+  <div id="cart">
+    <h3>Panier</h3>
+    <div id="cartItems">(vide)</div>
+    <div><strong>Total: </strong><span id="cartTotal">0.00</span> €</div>
+    <h4>Commander</h4>
+    <div id="orderForm">
+      <label>Nom
+        <input id="name" required>
+      </label>
+      <label>Email
+        <input id="email">
+      </label>
+      <label>Téléphone
+        <input id="phone">
+      </label>
+      <label>Numéro de table (facultatif)
+        <input id="table">
+      </label>
+      <button id="placeOrder">Passer la commande</button>
+      <div id="orderMsg"></div>
+    </div>
+  </div>
+
+  <script>
+    const apiBase = '../backend-php/index.php/api';
+    let products = [];
+    let cart = {};
+
+    function fetchProducts(){
+      fetch(apiBase + '/produits')
+        .then(r=>r.json()).then(data=>{ products = data; renderProducts(); }).catch(e=>{ document.getElementById('products').textContent='Erreur chargement'; });
+    }
+
+    function renderProducts(){
+      const el = document.getElementById('products');
+      el.innerHTML = '';
+      products.forEach(p=>{
+        const div = document.createElement('div'); div.className='prod';
+        div.innerHTML = `<strong>${p.nom}</strong><div>${p.description||''}</div><div><em>${parseFloat(p.prix).toFixed(2)} €</em></div>`;
+        const btn = document.createElement('button'); btn.textContent='Ajouter';
+        btn.onclick = ()=>{ addToCart(p); };
+        div.appendChild(btn);
+        el.appendChild(div);
+      });
+    }
+
+    function addToCart(p){
+      if (!cart[p.id]) cart[p.id] = {...p, quantite:0};
+      cart[p.id].quantite += 1;
+      renderCart();
+    }
+
+    function renderCart(){
+      const itemsEl = document.getElementById('cartItems');
+      itemsEl.innerHTML = '';
+      let total = 0;
+      const keys = Object.keys(cart);
+      if (keys.length === 0) { itemsEl.textContent='(vide)'; document.getElementById('cartTotal').textContent='0.00'; return; }
+      keys.forEach(k=>{
+        const it = cart[k];
+        const div = document.createElement('div');
+        div.innerHTML = `${it.nom} x ${it.quantite} — ${(it.prix*it.quantite).toFixed(2)} € `;
+        const rm = document.createElement('button'); rm.textContent='-'; rm.onclick=()=>{ changeQty(it.id, -1); };
+        const pl = document.createElement('button'); pl.textContent='+'; pl.onclick=()=>{ changeQty(it.id, 1); };
+        div.appendChild(rm); div.appendChild(pl);
+        itemsEl.appendChild(div);
+        total += parseFloat(it.prix) * it.quantite;
+      });
+      document.getElementById('cartTotal').textContent = total.toFixed(2);
+    }
+
+    function changeQty(id, delta){
+      if (!cart[id]) return;
+      cart[id].quantite += delta;
+      if (cart[id].quantite <= 0) delete cart[id];
+      renderCart();
+    }
+
+    document.getElementById('placeOrder').addEventListener('click', ()=>{
+      const name = document.getElementById('name').value.trim();
+      if (!name){ alert('Le nom est requis'); return; }
+      const items = Object.values(cart).map(i=>({ id:i.id, nom:i.nom, prix:parseFloat(i.prix), quantite:i.quantite }));
+      if (items.length === 0){ alert('Le panier est vide'); return; }
+      const total = Object.values(cart).reduce((s,i)=>s + parseFloat(i.prix)*i.quantite, 0);
+      const payload = { nom: name, email: document.getElementById('email').value, telephone: document.getElementById('phone').value, table_number: document.getElementById('table').value, items, total };
+      fetch(apiBase + '/commandes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+        .then(r=>r.json()).then(res=>{
+          if (res.id){ document.getElementById('orderMsg').textContent = 'Commande enregistrée. ID: ' + res.id; cart = {}; renderCart(); }
+          else{ document.getElementById('orderMsg').textContent = 'Erreur: ' + (res.error || JSON.stringify(res)); }
+        }).catch(e=>{ document.getElementById('orderMsg').textContent = 'Erreur réseau'; });
+    });
+
+    fetchProducts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QR Reservation - Admin</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:16px}
+    .cmd{border:1px solid #ddd;padding:8px;margin:8px;border-radius:6px}
+    .actions button{margin-right:6px}
+  </style>
+</head>
+<body>
+  <h1>Administration - Commandes</h1>
+  <div>
+    <button id="refresh">Rafraîchir</button>
+    <select id="filterStatus"><option value="">Tous</option><option value="en_attente">en_attente</option><option value="en_preparation">en_preparation</option><option value="prete">prete</option><option value="terminee">terminee</option><option value="annulee">annulee</option></select>
+  </div>
+  <div id="list">Chargement...</div>
+
+  <script>
+    const apiBase = '../backend-php/index.php/api';
+    async function fetchCommandes(){
+      const res = await fetch(apiBase + '/commandes');
+      const data = await res.json();
+      return data;
+    }
+
+    function render(list){
+      const el = document.getElementById('list'); el.innerHTML='';
+      if (!list.length) { el.textContent='Aucune commande'; return; }
+      list.forEach(c=>{
+        const div = document.createElement('div'); div.className='cmd';
+        div.innerHTML = `<div><strong>ID:</strong> ${c.id} <strong>Statut:</strong> ${c.statut}</div>
+          <div><strong>Nom:</strong> ${c.nom || ''} <strong>Email:</strong> ${c.email || ''}</div>
+          <div><strong>Total:</strong> ${parseFloat(c.total).toFixed(2)} €</div>
+          <div><strong>Items:</strong> ${JSON.stringify(c.items)}</div>`;
+        const actions = document.createElement('div'); actions.className='actions';
+        ['en_attente','en_preparation','prete','terminee','annulee'].forEach(s=>{
+          const b = document.createElement('button'); b.textContent = s; b.onclick = ()=> changeStatus(c.id, s); actions.appendChild(b);
+        });
+        div.appendChild(actions);
+        el.appendChild(div);
+      });
+    }
+
+    async function load(){
+      const data = await fetchCommandes();
+      const filter = document.getElementById('filterStatus').value;
+      const list = filter ? data.filter(d=>d.statut===filter) : data;
+      render(list);
+    }
+
+    async function changeStatus(id, statut){
+      const res = await fetch(apiBase + '/commandes/' + id + '/statut', { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({statut}) });
+      const j = await res.json();
+      if (res.ok) load(); else alert('Erreur: ' + (j.error || JSON.stringify(j)));
+    }
+
+    document.getElementById('refresh').addEventListener('click', load);
+    document.getElementById('filterStatus').addEventListener('change', load);
+    load();
+  </script>
+</body>
+</html>

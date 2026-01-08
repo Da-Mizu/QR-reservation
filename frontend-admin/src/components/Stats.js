@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Stats.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
 
 function Stats() {
   const [stats, setStats] = useState(null);

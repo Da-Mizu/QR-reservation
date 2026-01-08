@@ -3,7 +3,20 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import './Confirmation.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+
+const normalizeCommande = (cmd) => {
+  if (!cmd) return cmd;
+  return {
+    ...cmd,
+    total: Number(cmd.total) || 0,
+    items: (cmd.items || []).map(it => ({
+      ...it,
+      prix: Number(it.prix) || 0,
+      quantite: Number(it.quantite) || 0,
+    })),
+  };
+};
 
 function Confirmation() {
   const [searchParams] = useSearchParams();
@@ -23,7 +36,7 @@ function Confirmation() {
   const chargerCommande = async () => {
     try {
       const response = await axios.get(`${API_URL}/commandes/${commandeId}`);
-      setCommande(response.data);
+      setCommande(normalizeCommande(response.data));
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement de la commande:', error);

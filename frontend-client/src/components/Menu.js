@@ -3,7 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import './Menu.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+
+// Force les champs numériques à être des nombres pour éviter les .toFixed sur des strings
+const normalizeProduit = (p) => ({
+  ...p,
+  prix: Number(p.prix) || 0,
+});
 
 function Menu() {
   const [produits, setProduits] = useState([]);
@@ -17,7 +23,7 @@ function Menu() {
     // Charger le panier depuis localStorage
     const panierSauvegarde = localStorage.getItem('panier');
     if (panierSauvegarde) {
-      setPanier(JSON.parse(panierSauvegarde));
+      setPanier(JSON.parse(panierSauvegarde).map(normalizeProduit));
     }
     
     // Récupérer le numéro de table depuis l'URL et le stocker
@@ -34,7 +40,7 @@ function Menu() {
   const chargerProduits = async () => {
     try {
       const response = await axios.get(`${API_URL}/produits`);
-      setProduits(response.data);
+      setProduits(response.data.map(normalizeProduit));
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
@@ -43,18 +49,19 @@ function Menu() {
   };
 
   const ajouterAuPanier = (produit) => {
-    const produitExistant = panier.find(item => item.id === produit.id);
+    const produitNormalise = normalizeProduit(produit);
+    const produitExistant = panier.find(item => item.id === produitNormalise.id);
     
     if (produitExistant) {
       const nouveauPanier = panier.map(item =>
         item.id === produit.id
-          ? { ...item, quantite: item.quantite + 1 }
+            ? { ...item, quantite: item.quantite + 1 }
           : item
       );
       setPanier(nouveauPanier);
       localStorage.setItem('panier', JSON.stringify(nouveauPanier));
     } else {
-      const nouveauPanier = [...panier, { ...produit, quantite: 1 }];
+      const nouveauPanier = [...panier, { ...produitNormalise, quantite: 1 }];
       setPanier(nouveauPanier);
       localStorage.setItem('panier', JSON.stringify(nouveauPanier));
     }

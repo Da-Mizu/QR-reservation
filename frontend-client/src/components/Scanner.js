@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import './Scanner.css';
@@ -7,8 +7,12 @@ function Scanner() {
   const [scanResult, setScanResult] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const scannerRef = useRef(null);
+  const scannedRef = useRef(false);
 
   useEffect(() => {
+    if (scannedRef.current) return; // Évite les scans multiples
+    
     const scanner = new Html5QrcodeScanner(
       "reader",
       {
@@ -21,27 +25,30 @@ function Scanner() {
       false
     );
 
+    scannerRef.current = scanner;
+
     scanner.render(
       (result) => {
+        if (scannedRef.current) return; // Double-check pour éviter les multiples appels
+        scannedRef.current = true;
+        
         setScanResult(result);
-        scanner.clear();
         console.log('QR Code scanné:', result);
         
-        // Extraire l'URL du résultat
+        // Arrêter immédiatement le scanner
+        try {
+          scanner.clear();
+        } catch (e) {
+          console.error('Erreur lors de l\'arrêt du scanner:', e);
+        }
+        
+        // Extraire l'URL du résultat et rediriger
         try {
           const url = new URL(result);
-          // Si l'URL contient /menu, rediriger vers cette URL complète (avec les paramètres)
-          if (url.pathname.includes('/menu') || url.pathname === '/') {
-            // Extraire le chemin et les paramètres de recherche
-            const path = url.pathname === '/' ? '/menu' : url.pathname;
-            const searchParams = url.search; // Inclut le ? et les paramètres
-            navigate(path + searchParams);
-          } else {
-            // Si c'est juste une URL vers /menu, rediriger
-            navigate('/menu' + url.search);
-          }
+          const path = url.pathname === '/' ? '/menu' : url.pathname;
+          const searchParams = url.search;
+          navigate(path + searchParams);
         } catch (e) {
-          // Si ce n'est pas une URL valide, essayer de parser manuellement
           if (result.includes('table=')) {
             const match = result.match(/table=([^&]*)/);
             if (match) {
@@ -55,15 +62,21 @@ function Scanner() {
         }
       },
       (err) => {
-        // Ne pas afficher les erreurs de scan continu
+        // Ignorer les erreurs de scan continu
         if (err && !err.includes('NotFoundException')) {
-          setError(err);
+          // Ne pas spammer setError à chaque tentative
         }
       }
     );
 
     return () => {
-      scanner.clear();
+      if (scannerRef.current) {
+        try {
+          scannerRef.current.clear();
+        } catch (e) {
+          console.error('Erreur lors du nettoyage du scanner:', e);
+        }
+      }
     };
   }, [navigate]);
 

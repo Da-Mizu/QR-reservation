@@ -2,7 +2,26 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+
+const toNumber = (val) => {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return val;
+  // support "3,5" coming de la BDD
+  const normalized = String(val).replace(',', '.');
+  const parsed = parseFloat(normalized);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const normalizeCommande = (c) => ({
+  ...c,
+  total: toNumber(c.total),
+  items: (c.items || []).map((it) => ({
+    ...it,
+    prix: toNumber(it.prix),
+    quantite: toNumber(it.quantite),
+  })),
+});
 
 function Dashboard() {
   const [commandes, setCommandes] = useState([]);
@@ -33,7 +52,7 @@ function Dashboard() {
         console.log('Première commande:', response.data[0]);
         console.log('table_number de la première commande:', response.data[0].table_number);
       }
-      setCommandes(response.data);
+      setCommandes(response.data.map(normalizeCommande));
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des commandes:', error);
@@ -63,7 +82,7 @@ function Dashboard() {
     en_preparation: commandes.filter(c => c.statut === 'en_preparation').length,
     prete: commandes.filter(c => c.statut === 'prete').length,
     terminee: commandes.filter(c => c.statut === 'terminee').length,
-    totalRevenus: commandes.reduce((sum, c) => sum + c.total, 0)
+    totalRevenus: commandes.reduce((sum, c) => sum + toNumber(c.total), 0)
   };
 
   const getStatutColor = (statut) => {
