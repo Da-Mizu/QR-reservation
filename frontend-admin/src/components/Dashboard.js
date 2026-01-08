@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.css';
 import { AuthContext } from '../context/AuthContext';
@@ -146,6 +147,12 @@ function Dashboard() {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="gap-2">
+              <Link 
+                to="/qr-generator"
+                className="btn btn-success btn-sm text-white text-decoration-none"
+              >
+                📱 Générer QR
+              </Link>
               <Button 
                 variant={autoRefresh ? 'success' : 'secondary'}
                 size="sm"

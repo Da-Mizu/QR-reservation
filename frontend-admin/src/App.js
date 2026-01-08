@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } f
 import Dashboard from './components/Dashboard';
 import Stats from './components/Stats';
 import Login from './components/Login';
+import QRGenerator from './components/QRGenerator';
 import { AuthContext } from './context/AuthContext';
 import './App.css';
 
@@ -32,6 +33,13 @@ function Navigation() {
             onClick={() => setMenuOpen(false)}
           >
             📊 Statistiques
+          </Link>
+          <Link 
+            to="/qr-generator" 
+            className={location.pathname === '/qr-generator' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setMenuOpen(false)}
+          >
+            📱 Générer QR
           </Link>
           
           <div className="nav-user">
@@ -85,6 +93,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Stats />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/qr-generator" 
+            element={
+              <ProtectedRoute>
+                <QRGenerator />
               </ProtectedRoute>
             } 
           />
