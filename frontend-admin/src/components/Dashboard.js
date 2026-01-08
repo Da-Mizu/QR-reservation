@@ -85,7 +85,9 @@ function Dashboard() {
     en_preparation: commandes.filter(c => c.statut === 'en_preparation').length,
     prete: commandes.filter(c => c.statut === 'prete').length,
     terminee: commandes.filter(c => c.statut === 'terminee').length,
-    totalRevenus: commandes.reduce((sum, c) => sum + toNumber(c.total), 0)
+    totalRevenus: commandes
+      .filter(c => c.statut !== 'annulee')
+      .reduce((sum, c) => sum + toNumber(c.total), 0)
   };
 
   const getStatutVariant = (statut) => {
