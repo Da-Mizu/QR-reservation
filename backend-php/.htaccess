@@ -1,0 +1,12 @@
+# Router pour API RESTful
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Ne pas réecrire les fichiers réels
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Rewrite vers index.php avec le chemin préservé
+    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+</IfModule>
+

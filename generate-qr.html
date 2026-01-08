@@ -83,6 +83,17 @@
         </div>
         
         <div class="input-group">
+            <label for="restaurantId">ID du restaurant (optionnel) :</label>
+            <input 
+                type="number" 
+                id="restaurantId" 
+                placeholder="1"
+                value="1"
+                min="1"
+            />
+        </div>
+        
+        <div class="input-group">
             <label for="tableNumber">Numéro de table (optionnel) :</label>
             <input 
                 type="text" 
@@ -100,9 +111,10 @@
             <strong>💡 Instructions :</strong>
             <ul>
                 <li>Entrez l'URL de votre frontend client (par défaut: http://localhost:3000/menu)</li>
+                <li>Entrez l'ID du restaurant pour identifier à quel restaurant appartient cette table</li>
                 <li>Optionnellement, ajoutez un numéro de table pour personnaliser le QR code</li>
                 <li>Générez le QR code et imprimez-le pour l'afficher sur les tables</li>
-                <li>Les clients pourront scanner ce QR code pour accéder directement au menu</li>
+                <li>Les clients pourront scanner ce QR code pour accéder directement au menu de ce restaurant</li>
             </ul>
         </div>
     </div>
@@ -112,6 +124,7 @@
 
         function generateQR() {
             const url = document.getElementById('url').value;
+            const restaurantId = document.getElementById('restaurantId').value;
             const tableNumber = document.getElementById('tableNumber').value;
             
             if (!url) {
@@ -119,10 +132,17 @@
                 return;
             }
 
-            // Construire l'URL finale
+            // Construire l'URL finale avec restaurantId et tableNumber
             let finalUrl = url;
+            const params = [];
+            if (restaurantId) {
+                params.push(`restaurant=${encodeURIComponent(restaurantId)}`);
+            }
             if (tableNumber) {
-                finalUrl += `?table=${encodeURIComponent(tableNumber)}`;
+                params.push(`table=${encodeURIComponent(tableNumber)}`);
+            }
+            if (params.length > 0) {
+                finalUrl += `?${params.join('&')}`;
             }
 
             // Nettoyer le conteneur précédent

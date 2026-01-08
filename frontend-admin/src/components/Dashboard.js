@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.css';
+import { AuthContext } from '../context/AuthContext';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+// Normalise l'URL API pour éviter /index.php/api ou /api/api
+const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
+const API_BASE = RAW_API_URL
+  .replace(/\/$/, '')
+  .replace(/\/index\.php\/?$/, '')
+  .replace(/\/api\/?$/, '');
+const API_URL = `${API_BASE}/api`;
 
 const toNumber = (val) => {
   if (val === null || val === undefined) return 0;
@@ -29,6 +36,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('toutes');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     chargerCommandes();
@@ -39,11 +47,12 @@ function Dashboard() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [autoRefresh]);
+  }, [autoRefresh, token]);
 
   const chargerCommandes = async () => {
     try {
-      const response = await axios.get(`${API_URL}/commandes`);
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const response = await axios.get(`${API_URL}/commandes`, config);
       setCommandes(response.data.map(normalizeCommande));
       setLoading(false);
     } catch (error) {
@@ -54,9 +63,10 @@ function Dashboard() {
 
   const mettreAJourStatut = async (commandeId, nouveauStatut) => {
     try {
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       await axios.patch(`${API_URL}/commandes/${commandeId}/statut`, {
         statut: nouveauStatut
-      });
+      }, config);
       chargerCommandes();
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);

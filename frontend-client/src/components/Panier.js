@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Panier.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
+const API_BASE = RAW_API_URL
+  .replace(/\/$/, '')
+  .replace(/\/index\.php\/?$/, '')
+  .replace(/\/api\/?$/, '');
+const API_URL = `${API_BASE}/api`;
 
 function Panier() {
   const [panier, setPanier] = useState([]);
@@ -63,15 +68,18 @@ function Panier() {
     setLoading(true);
 
     try {
-      // Récupérer le numéro de table depuis localStorage
+      // Récupérer le numéro de table et le restaurant_id depuis localStorage
       const tableNumber = localStorage.getItem('tableNumber');
-      console.log('Numéro de table récupéré depuis localStorage:', tableNumber);
+      const restaurantId = localStorage.getItem('restaurantId') || '1';
+      console.log('Numéro de table récupéré:', tableNumber);
+      console.log('ID restaurant récupéré:', restaurantId);
       
       const commande = {
         nom: formData.nom,
         email: formData.email || null,
         telephone: formData.telephone || null,
         table_number: tableNumber || null,
+        restaurant_id: parseInt(restaurantId) || 1,  // IMPORTANT: Ajouter le restaurant_id
         items: panier.map(item => ({
           id: item.id,
           nom: item.nom,
@@ -82,7 +90,7 @@ function Panier() {
       };
       
       console.log('Commande à envoyer:', commande);
-      console.log('table_number dans la commande:', commande.table_number);
+      console.log('restaurant_id dans la commande:', commande.restaurant_id);
 
       const response = await axios.post(`${API_URL}/commandes`, commande);
       

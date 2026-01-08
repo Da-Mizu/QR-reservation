@@ -3,7 +3,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import './Confirmation.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+// Normalise API URL
+const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
+const API_BASE = RAW_API_URL
+  .replace(/\/$/, '')
+  .replace(/\/index\.php\/?$/, '')
+  .replace(/\/api\/?$/, '');
+const API_URL = `${API_BASE}/api`;
 
 const normalizeCommande = (cmd) => {
   if (!cmd) return cmd;
@@ -35,7 +41,12 @@ function Confirmation() {
 
   const chargerCommande = async () => {
     try {
-      const response = await axios.get(`${API_URL}/commandes/${commandeId}`);
+      // Passer restaurant depuis localStorage si disponible (QR flow)
+      const restaurantId = localStorage.getItem('restaurantId');
+      const url = restaurantId
+        ? `${API_URL}/commandes/${commandeId}?restaurant=${encodeURIComponent(restaurantId)}`
+        : `${API_URL}/commandes/${commandeId}`;
+      const response = await axios.get(url);
       setCommande(normalizeCommande(response.data));
       setLoading(false);
     } catch (error) {

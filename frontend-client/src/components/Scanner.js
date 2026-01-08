@@ -28,37 +28,51 @@ function Scanner() {
     scannerRef.current = scanner;
 
     scanner.render(
-      (result) => {
+      async (result) => {
         if (scannedRef.current) return; // Double-check pour éviter les multiples appels
         scannedRef.current = true;
-        
+
         setScanResult(result);
         console.log('QR Code scanné:', result);
-        
-        // Arrêter immédiatement le scanner
+
+        // Arrêter immédiatement le scanner (clear() retourne une Promise)
         try {
-          scanner.clear();
+          await scanner.clear().catch((e) => {
+            // Ignorer les erreurs liées au DOM (removeChild race conditions)
+            console.warn('scanner.clear() rejected, ignored:', e && e.message ? e.message : e);
+          });
         } catch (e) {
-          console.error('Erreur lors de l\'arrêt du scanner:', e);
+          console.warn('Erreur lors de l\'arrêt du scanner (catch):', e);
         }
         
         // Extraire l'URL du résultat et rediriger
         try {
           const url = new URL(result);
           const path = url.pathname === '/' ? '/menu' : url.pathname;
-          const searchParams = url.search;
-          navigate(path + searchParams);
+          
+          // Récupérer tous les paramètres (restaurant, table, etc.)
+          const restaurant = url.searchParams.get('restaurant');
+          const table = url.searchParams.get('table');
+          
+          // Construire les paramètres pour la navigation
+          const params = new URLSearchParams();
+          if (restaurant) params.append('restaurant', restaurant);
+          if (table) params.append('table', table);
+          
+          const searchString = params.toString() ? `?${params.toString()}` : '';
+          console.log('Navigation vers:', path + searchString, { restaurant, table });
+          navigate(path + searchString);
         } catch (e) {
-          if (result.includes('table=')) {
-            const match = result.match(/table=([^&]*)/);
-            if (match) {
-              navigate(`/menu?table=${match[1]}`);
-            } else {
-              navigate('/menu');
-            }
-          } else {
-            navigate('/menu');
-          }
+          // Si l'URL n'est pas valide, essayer de parser les paramètres directement
+          const restaurantMatch = result.match(/restaurant=([^&]*)/);
+          const tableMatch = result.match(/table=([^&]*)/);
+          
+          const params = new URLSearchParams();
+          if (restaurantMatch) params.append('restaurant', restaurantMatch[1]);
+          if (tableMatch) params.append('table', tableMatch[1]);
+          
+          const searchString = params.toString() ? `?${params.toString()}` : '';
+          navigate(`/menu${searchString}`);
         }
       },
       (err) => {
@@ -71,11 +85,10 @@ function Scanner() {
 
     return () => {
       if (scannerRef.current) {
-        try {
-          scannerRef.current.clear();
-        } catch (e) {
-          console.error('Erreur lors du nettoyage du scanner:', e);
-        }
+        // clear() peut rejeter si le DOM a déjà changé, on ignore
+        scannerRef.current.clear().catch((e) => {
+          console.warn('Erreur lors du nettoyage du scanner (ignored):', e && e.message ? e.message : e);
+        });
       }
     };
   }, [navigate]);

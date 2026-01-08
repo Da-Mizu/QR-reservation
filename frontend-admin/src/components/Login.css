@@ -1,0 +1,23 @@
+.login-card {
+  border: none;
+  border-radius: 12px;
+  margin-top: 0;
+}
+
+.login-card .card-body {
+  border-radius: 12px;
+}
+
+.btn-link-text {
+  background: none;
+  border: none;
+  color: #0d6efd;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font: inherit;
+}
+
+.btn-link-text:hover {
+  color: #0b5ed7;
+}

@@ -3,7 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import './Menu.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
+const API_BASE = RAW_API_URL
+  .replace(/\/$/, '')
+  .replace(/\/index\.php\/?$/, '')
+  .replace(/\/api\/?$/, '');
+const API_URL = `${API_BASE}/api`;
 
 // Force les champs numériques à être des nombres pour éviter les .toFixed sur des strings
 const normalizeProduit = (p) => ({
@@ -26,15 +31,21 @@ function Menu() {
       setPanier(JSON.parse(panierSauvegarde).map(normalizeProduit));
     }
     
-    // Récupérer le numéro de table depuis l'URL et le stocker
+    // Récupérer le numéro de table et le restaurantId depuis l'URL et les stocker
     const tableNumber = searchParams.get('table');
+    const restaurantId = searchParams.get('restaurant') || '1'; // Par défaut restaurant_id = 1
+    
     console.log('Numéro de table depuis URL:', tableNumber);
+    console.log('ID restaurant depuis QR:', restaurantId);
+    
     if (tableNumber) {
       localStorage.setItem('tableNumber', tableNumber);
-      console.log('Numéro de table sauvegardé dans localStorage:', tableNumber);
-    } else {
-      console.log('Aucun numéro de table trouvé dans l\'URL');
+      console.log('Numéro de table sauvegardé:', tableNumber);
     }
+    
+    // Toujours sauvegarder le restaurantId (important pour multi-restaurant)
+    localStorage.setItem('restaurantId', restaurantId);
+    console.log('ID restaurant sauvegardé:', restaurantId);
   }, [searchParams]);
 
   const chargerProduits = async () => {

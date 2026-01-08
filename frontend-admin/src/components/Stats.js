@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Container, Navbar, Nav, Button, Spinner, Row, Col, Card, Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Stats.css';
+import { AuthContext } from '../context/AuthContext';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
+// Normalise l'URL API pour éviter /index.php/api ou /api/api
+const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
+const API_BASE = RAW_API_URL
+  .replace(/\/$/, '')
+  .replace(/\/index\.php\/?$/, '')
+  .replace(/\/api\/?$/, '');
+const API_URL = `${API_BASE}/api`;
 
 function Stats() {
   const [stats, setStats] = useState(null);
@@ -13,21 +20,23 @@ function Stats() {
   const [statsProduits, setStatsProduits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [periode, setPeriode] = useState('tous');
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     chargerStats();
-  }, []);
+  }, [token]);
 
   const chargerStats = async () => {
     try {
       setLoading(true);
       console.log('Chargement des statistiques depuis:', API_URL);
       
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       const [statsRes, tablesRes, joursRes, produitsRes] = await Promise.all([
-        axios.get(`${API_URL}/stats`),
-        axios.get(`${API_URL}/stats/tables`),
-        axios.get(`${API_URL}/stats/jours`),
-        axios.get(`${API_URL}/stats/produits`)
+        axios.get(`${API_URL}/stats`, config),
+        axios.get(`${API_URL}/stats/tables`, config),
+        axios.get(`${API_URL}/stats/jours`, config),
+        axios.get(`${API_URL}/stats/produits`, config)
       ]);
       
       console.log('Réponses reçues:');
