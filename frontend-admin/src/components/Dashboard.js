@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
@@ -7,7 +9,6 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservatio
 const toNumber = (val) => {
   if (val === null || val === undefined) return 0;
   if (typeof val === 'number') return val;
-  // support "3,5" coming de la BDD
   const normalized = String(val).replace(',', '.');
   const parsed = parseFloat(normalized);
   return Number.isNaN(parsed) ? 0 : parsed;
@@ -31,13 +32,10 @@ function Dashboard() {
 
   useEffect(() => {
     chargerCommandes();
-    
-    // Auto-refresh toutes les 5 secondes si activé
     let interval;
     if (autoRefresh) {
       interval = setInterval(chargerCommandes, 5000);
     }
-
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -46,12 +44,6 @@ function Dashboard() {
   const chargerCommandes = async () => {
     try {
       const response = await axios.get(`${API_URL}/commandes`);
-      // Debug: vérifier les données
-      console.log('Commandes chargées:', response.data);
-      if (response.data.length > 0) {
-        console.log('Première commande:', response.data[0]);
-        console.log('table_number de la première commande:', response.data[0].table_number);
-      }
       setCommandes(response.data.map(normalizeCommande));
       setLoading(false);
     } catch (error) {
@@ -85,15 +77,15 @@ function Dashboard() {
     totalRevenus: commandes.reduce((sum, c) => sum + toNumber(c.total), 0)
   };
 
-  const getStatutColor = (statut) => {
-    const colors = {
-      'en_attente': '#ffc107',
-      'en_preparation': '#17a2b8',
-      'prete': '#28a745',
-      'terminee': '#6c757d',
-      'annulee': '#dc3545'
+  const getStatutVariant = (statut) => {
+    const variants = {
+      'en_attente': 'warning',
+      'en_preparation': 'info',
+      'prete': 'success',
+      'terminee': 'secondary',
+      'annulee': 'danger'
     };
-    return colors[statut] || '#6c757d';
+    return variants[statut] || 'secondary';
   };
 
   const getStatutLabel = (statut) => {
@@ -109,194 +101,246 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="dashboard-container">
-        <div className="loading">Chargement des commandes...</div>
-      </div>
+      <>
+        <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
+          <Container fluid>
+            <Navbar.Brand className="fw-bold">Tableau de bord</Navbar.Brand>
+            <Navbar.Toggle aria-controls="navbar-nav" />
+            <Navbar.Collapse id="navbar-nav" className="justify-content-end">
+              <Nav className="gap-2">
+                <Button 
+                  variant={autoRefresh ? 'success' : 'secondary'}
+                  size="sm"
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                >
+                  {autoRefresh ? 'Auto ✓' : 'Auto ✗'}
+                </Button>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Chargement...</span>
+          </Spinner>
+        </Container>
+      </>
     );
   }
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>Tableau de bord - Gestion des commandes</h1>
-        <div className="header-actions">
-          <button 
-            className={`btn ${autoRefresh ? 'btn-success' : 'btn-secondary'}`}
-            onClick={() => setAutoRefresh(!autoRefresh)}
-          >
-            {autoRefresh ? 'Auto-refresh: ON' : 'Auto-refresh: OFF'}
-          </button>
-          <button className="btn btn-primary" onClick={chargerCommandes}>
-            Actualiser
-          </button>
-        </div>
-      </header>
+    <>
+      <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
+        <Container fluid>
+          <Navbar.Brand className="fw-bold">Tableau de bord</Navbar.Brand>
+          <Navbar.Toggle aria-controls="navbar-nav" />
+          <Navbar.Collapse id="navbar-nav" className="justify-content-end">
+            <Nav className="gap-2">
+              <Button 
+                variant={autoRefresh ? 'success' : 'secondary'}
+                size="sm"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+              >
+                {autoRefresh ? 'Auto ✓' : 'Auto ✗'}
+              </Button>
+              <Button 
+                variant="primary"
+                size="sm"
+                onClick={chargerCommandes}
+              >
+                Actualiser
+              </Button>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total commandes</h3>
-          <p className="stat-value">{stats.total}</p>
-        </div>
-        <div className="stat-card stat-warning">
-          <h3>En attente</h3>
-          <p className="stat-value">{stats.en_attente}</p>
-        </div>
-        <div className="stat-card stat-info">
-          <h3>En préparation</h3>
-          <p className="stat-value">{stats.en_preparation}</p>
-        </div>
-        <div className="stat-card stat-success">
-          <h3>Prêtes</h3>
-          <p className="stat-value">{stats.prete}</p>
-        </div>
-        <div className="stat-card stat-revenue">
-          <h3>Revenus totaux</h3>
-          <p className="stat-value">{stats.totalRevenus.toFixed(2)}€</p>
-        </div>
-      </div>
+      <Container fluid className="py-4">
+      <Row className="mb-4">
+        <Col>
+          <h2 className="mb-0">Gestion des commandes</h2>
+        </Col>
+      </Row>
 
-      <div className="filters">
-        <button 
-          className={`filter-btn ${filter === 'toutes' ? 'active' : ''}`}
-          onClick={() => setFilter('toutes')}
-        >
-          Toutes
-        </button>
-        <button 
-          className={`filter-btn ${filter === 'en_attente' ? 'active' : ''}`}
-          onClick={() => setFilter('en_attente')}
-        >
-          En attente
-        </button>
-        <button 
-          className={`filter-btn ${filter === 'en_preparation' ? 'active' : ''}`}
-          onClick={() => setFilter('en_preparation')}
-        >
-          En préparation
-        </button>
-        <button 
-          className={`filter-btn ${filter === 'prete' ? 'active' : ''}`}
-          onClick={() => setFilter('prete')}
-        >
-          Prêtes
-        </button>
-        <button 
-          className={`filter-btn ${filter === 'terminee' ? 'active' : ''}`}
-          onClick={() => setFilter('terminee')}
-        >
-          Terminées
-        </button>
-      </div>
+      <Row className="mb-4">
+        <Col lg={3} md={6} className="mb-3">
+          <Card className="text-center">
+            <Card.Body>
+              <Card.Title className="text-muted small">Total</Card.Title>
+              <h2>{stats.total}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={3} md={6} className="mb-3">
+          <Card className="text-center">
+            <Card.Body>
+              <Card.Title className="text-muted small">En attente</Card.Title>
+              <h2 className="text-warning">{stats.en_attente}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={3} md={6} className="mb-3">
+          <Card className="text-center">
+            <Card.Body>
+              <Card.Title className="text-muted small">En préparation</Card.Title>
+              <h2 className="text-info">{stats.en_preparation}</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col lg={3} md={6} className="mb-3">
+          <Card className="text-center">
+            <Card.Body>
+              <Card.Title className="text-muted small">Revenus</Card.Title>
+              <h2 className="text-success">{stats.totalRevenus.toFixed(2)}€</h2>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-      <div className="commandes-list">
-        {commandesFiltrees.length === 0 ? (
-          <div className="no-commandes">
-            <p>Aucune commande trouvée</p>
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex gap-2 flex-wrap">
+            {['toutes', 'en_attente', 'en_preparation', 'prete', 'terminee'].map(status => (
+              <Button
+                key={status}
+                variant={filter === status ? 'primary' : 'outline-secondary'}
+                size="sm"
+                onClick={() => setFilter(status)}
+              >
+                {status === 'toutes' ? 'Toutes' : getStatutLabel(status)}
+              </Button>
+            ))}
           </div>
+        </Col>
+      </Row>
+
+      <Row>
+        {commandesFiltrees.length === 0 ? (
+          <Col>
+            <p className="text-center text-muted">Aucune commande trouvée</p>
+          </Col>
         ) : (
           commandesFiltrees.map(commande => (
-            <div key={commande.id} className="commande-card">
-              <div className="commande-header">
-                <div className="commande-info">
-                  <h3>Commande #{commande.id.substring(0, 8)}</h3>
-                  {commande.table_number ? (
-                    <p className="commande-table">🪑 Table: {commande.table_number}</p>
-                  ) : (
-                    <p className="commande-table-empty">🪑 Table: Non spécifiée</p>
-                  )}
-                  <p className="commande-client">{commande.nom}</p>
-                  {commande.email && <p className="commande-contact">📧 {commande.email}</p>}
-                  {commande.telephone && <p className="commande-contact">📞 {commande.telephone}</p>}
-                </div>
-                <div className="commande-meta">
-                  <span 
-                    className="statut-badge"
-                    style={{ backgroundColor: getStatutColor(commande.statut) }}
-                  >
+            <Col lg={6} className="mb-4" key={commande.id}>
+              <Card className="h-100">
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 className="mb-1">Commande #{commande.id.substring(0, 8)}</h5>
+                    {commande.table_number && (
+                      <small className="text-muted">🪑 Table {commande.table_number}</small>
+                    )}
+                  </div>
+                  <Badge bg={getStatutVariant(commande.statut)}>
                     {getStatutLabel(commande.statut)}
-                  </span>
-                  <p className="commande-date">
-                    {new Date(commande.created_at).toLocaleString('fr-FR')}
+                  </Badge>
+                </Card.Header>
+                <Card.Body>
+                  <p className="mb-2"><strong>{commande.nom}</strong></p>
+                  {commande.email && <p className="small text-muted">📧 {commande.email}</p>}
+                  {commande.telephone && <p className="small text-muted">📞 {commande.telephone}</p>}
+                  
+                  <hr />
+                  
+                  <h6 className="mb-2">Articles:</h6>
+                  <ul className="small list-unstyled">
+                    {commande.items.map((item, index) => (
+                      <li key={index} className="mb-1">
+                        {item.quantite}× {item.nom} <span className="float-end">{(item.prix * item.quantite).toFixed(2)}€</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <hr />
+                  <p className="mb-0">
+                    <strong>Total: {commande.total.toFixed(2)}€</strong>
                   </p>
-                  <p className="commande-total">{commande.total.toFixed(2)}€</p>
-                </div>
-              </div>
-
-              <div className="commande-items">
-                <h4>Articles:</h4>
-                <ul>
-                  {commande.items.map((item, index) => (
-                    <li key={index}>
-                      {item.quantite}× {item.nom} - {(item.prix * item.quantite).toFixed(2)}€
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="commande-actions">
-                {commande.statut === 'en_attente' && (
-                  <>
-                    <button 
-                      className="btn btn-info"
-                      onClick={() => mettreAJourStatut(commande.id, 'en_preparation')}
-                    >
-                      Commencer la préparation
-                    </button>
-                    <button 
-                      className="btn btn-danger"
-                      onClick={() => mettreAJourStatut(commande.id, 'annulee')}
-                    >
-                      Annuler
-                    </button>
-                  </>
-                )}
-                {commande.statut === 'en_preparation' && (
-                  <>
-                    <button 
-                      className="btn btn-success"
-                      onClick={() => mettreAJourStatut(commande.id, 'prete')}
-                    >
-                      Marquer comme prête
-                    </button>
-                    <button 
-                      className="btn btn-secondary"
-                      onClick={() => mettreAJourStatut(commande.id, 'en_attente')}
-                    >
-                      Retour en attente
-                    </button>
-                  </>
-                )}
-                {commande.statut === 'prete' && (
-                  <>
-                    <button 
-                      className="btn btn-primary"
-                      onClick={() => mettreAJourStatut(commande.id, 'terminee')}
-                    >
-                      Marquer comme terminée
-                    </button>
-                    <button 
-                      className="btn btn-secondary"
-                      onClick={() => mettreAJourStatut(commande.id, 'en_preparation')}
-                    >
-                      Retour en préparation
-                    </button>
-                  </>
-                )}
-                {commande.statut === 'terminee' && (
-                  <button 
-                    className="btn btn-secondary"
-                    onClick={() => mettreAJourStatut(commande.id, 'prete')}
-                  >
-                    Retour à prête
-                  </button>
-                )}
-              </div>
-            </div>
+                  <small className="text-muted d-block">
+                    {new Date(commande.created_at).toLocaleString('fr-FR')}
+                  </small>
+                </Card.Body>
+                <Card.Footer className="bg-transparent">
+                  <div className="d-flex gap-2 flex-wrap">
+                    {commande.statut === 'en_attente' && (
+                      <>
+                        <Button 
+                          variant="info"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'en_preparation')}
+                        >
+                          Préparer
+                        </Button>
+                        <Button 
+                          variant="danger"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'annulee')}
+                        >
+                          Annuler
+                        </Button>
+                      </>
+                    )}
+                    {commande.statut === 'en_preparation' && (
+                      <>
+                        <Button 
+                          variant="success"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'prete')}
+                        >
+                          Prête
+                        </Button>
+                        <Button 
+                          variant="secondary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'en_attente')}
+                        >
+                          Retour
+                        </Button>
+                      </>
+                    )}
+                    {commande.statut === 'prete' && (
+                      <>
+                        <Button 
+                          variant="primary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'terminee')}
+                        >
+                          Terminée
+                        </Button>
+                        <Button 
+                          variant="secondary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'en_preparation')}
+                        >
+                          Retour
+                        </Button>
+                      </>
+                    )}
+                    {commande.statut === 'terminee' && (
+                      <Button 
+                        variant="secondary"
+                        size="sm"
+                        className="w-100"
+                        onClick={() => mettreAJourStatut(commande.id, 'prete')}
+                      >
+                        Retour prête
+                      </Button>
+                    )}
+                  </div>
+                </Card.Footer>
+              </Card>
+            </Col>
           ))
         )}
-      </div>
-    </div>
+      </Row>
+    </Container>
+    </>
   );
 }
 
 export default Dashboard;
+

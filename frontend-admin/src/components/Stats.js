@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Container, Navbar, Nav, Button, Spinner, Row, Col, Card, Table } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './Stats.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php/index.php/api';
@@ -49,22 +51,65 @@ function Stats() {
 
   if (loading) {
     return (
-      <div className="stats-container">
-        <div className="loading">Chargement des statistiques...</div>
-      </div>
+      <>
+        <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
+          <Container fluid>
+            <Navbar.Brand className="fw-bold">Tableau de bord</Navbar.Brand>
+            <Navbar.Toggle aria-controls="navbar-nav" />
+            <Navbar.Collapse id="navbar-nav" className="justify-content-end">
+              <Nav className="gap-2">
+                <Button 
+                  variant="primary"
+                  size="sm"
+                  onClick={chargerStats}
+                >
+                  Actualiser
+                </Button>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Chargement...</span>
+          </Spinner>
+        </Container>
+      </>
     );
   }
 
   if (!stats) {
     return (
-      <div className="stats-container">
-        <div className="no-stats">
-          <p>Erreur: Impossible de charger les statistiques.</p>
-          <button className="btn btn-primary" onClick={chargerStats}>
-            Réessayer
-          </button>
-        </div>
-      </div>
+      <>
+        <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
+          <Container fluid>
+            <Navbar.Brand className="fw-bold">Tableau de bord</Navbar.Brand>
+            <Navbar.Toggle aria-controls="navbar-nav" />
+            <Navbar.Collapse id="navbar-nav" className="justify-content-end">
+              <Nav className="gap-2">
+                <Button 
+                  variant="primary"
+                  size="sm"
+                  onClick={chargerStats}
+                >
+                  Actualiser
+                </Button>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
+        <Container className="py-4">
+          <p className="text-center text-muted">Erreur: Impossible de charger les statistiques.</p>
+          <div className="text-center">
+            <Button 
+              variant="primary" 
+              onClick={chargerStats}
+            >
+              Réessayer
+            </Button>
+          </div>
+        </Container>
+      </>
     );
   }
 
@@ -73,171 +118,182 @@ function Stats() {
   const totalCommandes = parseInt(stats.total_commandes) || 0;
 
   return (
-    <div className="stats-container">
-      <div className="stats-header">
-        <h1>📊 Statistiques</h1>
-        <button className="btn btn-primary" onClick={chargerStats}>
-          🔄 Actualiser
-        </button>
-      </div>
+    <>
+      <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
+        <Container fluid>
+          <Navbar.Brand className="fw-bold">Tableau de bord</Navbar.Brand>
+          <Navbar.Toggle aria-controls="navbar-nav" />
+          <Navbar.Collapse id="navbar-nav" className="justify-content-end">
+            <Nav className="gap-2">
+              <Button 
+                variant="primary"
+                size="sm"
+                onClick={chargerStats}
+              >
+                Actualiser
+              </Button>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
-      {/* Statistiques générales */}
-      <div className="stats-grid">
-        <div className="stat-card stat-revenue">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <h3>Revenus totaux</h3>
-            <p className="stat-value">{revenusTotaux.toFixed(2)}€</p>
-          </div>
-        </div>
+      <Container fluid className="py-4">
+        <Row className="mb-4">
+          <Col>
+            <h2 className="mb-0">Statistiques</h2>
+          </Col>
+        </Row>
 
-        <div className="stat-card stat-orders">
-          <div className="stat-icon">📦</div>
-          <div className="stat-content">
-            <h3>Total commandes</h3>
-            <p className="stat-value">{totalCommandes}</p>
-          </div>
-        </div>
+        <Row className="mb-4">
+          <Col lg={3} md={6} className="mb-3">
+            <Card className="text-center">
+              <Card.Body>
+                <Card.Title className="text-muted small">Revenus totaux</Card.Title>
+                <h2 className="text-success">{revenusTotaux.toFixed(2)}€</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col lg={3} md={6} className="mb-3">
+            <Card className="text-center">
+              <Card.Body>
+                <Card.Title className="text-muted small">Total commandes</Card.Title>
+                <h2>{totalCommandes}</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col lg={3} md={6} className="mb-3">
+            <Card className="text-center">
+              <Card.Body>
+                <Card.Title className="text-muted small">Panier moyen</Card.Title>
+                <h2 className="text-info">{panierMoyen.toFixed(2)}€</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col lg={3} md={6} className="mb-3">
+            <Card className="text-center">
+              <Card.Body>
+                <Card.Title className="text-muted small">En préparation</Card.Title>
+                <h2 className="text-warning">{stats?.en_preparation || 0}</h2>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
-        <div className="stat-card stat-average">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h3>Panier moyen</h3>
-            <p className="stat-value">{panierMoyen.toFixed(2)}€</p>
-          </div>
-        </div>
+        {/* Statistiques par table */}
+        {statsTables.length > 0 && (
+          <Row className="mb-4">
+            <Col>
+              <Card>
+                <Card.Header className="bg-white border-bottom">
+                  <Card.Title className="mb-0">🪑 Statistiques par table</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  <Table striped hover responsive>
+                    <thead>
+                      <tr>
+                        <th>Table</th>
+                        <th>Commandes</th>
+                        <th>Revenus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsTables.map((stat, index) => (
+                        <tr key={index}>
+                          <td><strong>Table {stat.table_number}</strong></td>
+                          <td>{stat.nombre_commandes}</td>
+                          <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
 
-        <div className="stat-card stat-pending">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <h3>En attente</h3>
-            <p className="stat-value">{stats?.en_attente || 0}</p>
-          </div>
-        </div>
+        {/* Statistiques par jour */}
+        {statsJours.length > 0 && (
+          <Row className="mb-4">
+            <Col>
+              <Card>
+                <Card.Header className="bg-white border-bottom">
+                  <Card.Title className="mb-0">📅 Évolution sur 30 jours</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  <Table striped hover responsive>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Commandes</th>
+                        <th>Revenus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsJours.map((stat, index) => (
+                        <tr key={index}>
+                          <td>{new Date(stat.date).toLocaleDateString('fr-FR')}</td>
+                          <td>{stat.nombre_commandes}</td>
+                          <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
 
-        <div className="stat-card stat-preparing">
-          <div className="stat-icon">👨‍🍳</div>
-          <div className="stat-content">
-            <h3>En préparation</h3>
-            <p className="stat-value">{stats?.en_preparation || 0}</p>
-          </div>
-        </div>
+        {/* Produits les plus commandés */}
+        {statsProduits.length > 0 && (
+          <Row className="mb-4">
+            <Col>
+              <Card>
+                <Card.Header className="bg-white border-bottom">
+                  <Card.Title className="mb-0">🍕 Produits les plus commandés</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                  <Table striped hover responsive>
+                    <thead>
+                      <tr>
+                        <th>Produit</th>
+                        <th>Commandes</th>
+                        <th>Quantité</th>
+                        <th>Revenus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {statsProduits.map((stat, index) => (
+                        <tr key={index}>
+                          <td><strong>{stat.nom}</strong></td>
+                          <td>{stat.nombre_commandes}</td>
+                          <td>{stat.quantite_totale}</td>
+                          <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
 
-        <div className="stat-card stat-ready">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <h3>Prêtes</h3>
-            <p className="stat-value">{stats?.prete || 0}</p>
-          </div>
-        </div>
-
-        <div className="stat-card stat-completed">
-          <div className="stat-icon">✔️</div>
-          <div className="stat-content">
-            <h3>Terminées</h3>
-            <p className="stat-value">{stats?.terminee || 0}</p>
-          </div>
-        </div>
-
-        <div className="stat-card stat-cancelled">
-          <div className="stat-icon">❌</div>
-          <div className="stat-content">
-            <h3>Annulées</h3>
-            <p className="stat-value">{stats?.annulee || 0}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Statistiques par table */}
-      {statsTables.length > 0 && (
-        <div className="stats-section">
-          <h2>🪑 Statistiques par table</h2>
-          <div className="table-stats">
-            <table className="stats-table">
-              <thead>
-                <tr>
-                  <th>Table</th>
-                  <th>Nombre de commandes</th>
-                  <th>Revenus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {statsTables.map((stat, index) => (
-                  <tr key={index}>
-                    <td><strong>{stat.table_number}</strong></td>
-                    <td>{stat.nombre_commandes}</td>
-                    <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Statistiques par jour */}
-      {statsJours.length > 0 && (
-        <div className="stats-section">
-          <h2>📅 Évolution sur 30 jours</h2>
-          <div className="days-stats">
-            <table className="stats-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Nombre de commandes</th>
-                  <th>Revenus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {statsJours.map((stat, index) => (
-                  <tr key={index}>
-                    <td>{new Date(stat.date).toLocaleDateString('fr-FR')}</td>
-                    <td>{stat.nombre_commandes}</td>
-                    <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Produits les plus commandés */}
-      {statsProduits.length > 0 && (
-        <div className="stats-section">
-          <h2>🍕 Produits les plus commandés</h2>
-          <div className="products-stats">
-            <table className="stats-table">
-              <thead>
-                <tr>
-                  <th>Produit</th>
-                  <th>Nombre de commandes</th>
-                  <th>Quantité totale</th>
-                  <th>Revenus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {statsProduits.map((stat, index) => (
-                  <tr key={index}>
-                    <td><strong>{stat.nom}</strong></td>
-                    <td>{stat.nombre_commandes}</td>
-                    <td>{stat.quantite_totale}</td>
-                    <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {statsTables.length === 0 && statsJours.length === 0 && statsProduits.length === 0 && (
-        <div className="no-stats">
-          <p>Aucune statistique disponible pour le moment.</p>
-          <p>Les statistiques apparaîtront après la première commande.</p>
-        </div>
-      )}
-    </div>
+        {statsTables.length === 0 && statsJours.length === 0 && statsProduits.length === 0 && (
+          <Row>
+            <Col>
+              <Card className="text-center">
+                <Card.Body className="py-5">
+                  <p className="text-muted mb-2">Aucune statistique disponible pour le moment.</p>
+                  <p className="text-muted small">Les statistiques apparaîtront après la première commande.</p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
+      </Container>
+    </>
   );
 }
 
