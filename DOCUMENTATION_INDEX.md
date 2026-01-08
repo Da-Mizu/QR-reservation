@@ -19,207 +19,34 @@
 ## 📖 Documentation Par Type
 
 ### 🔧 Configuration & Déploiement
-- **[CONFIGURATION.md](CONFIGURATION.md)** ⭐
-  - Variables d'environnement
-  - Configuration production
-  - Secrets et sécurité
-  - HTTPS et SSL
-  - MySQL configuration
-  - Troubleshooting
+# Documentation Index
 
-- **[deploy.ps1](deploy.ps1)** - Script PowerShell automatisé
-  - Installe dépendances
-  - Réinitialise BD
-  - Teste authentification
-  
-- **[deploy.sh](deploy.sh)** - Script Bash automatisé
-  - Version Linux/Mac du script
+## Que lire en premier
+- Aperçu + flux complet : [README.md](README.md)
+- Démarrage express : [QUICKSTART.md](QUICKSTART.md)
+- Config (ports, API URL, DB) : [CONFIGURATION.md](CONFIGURATION.md)
+- Architecture/résumé technique : [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
+- Historique auth/multi-resto : [CHANGELOG_AUTH_SYSTEM.md](CHANGELOG_AUTH_SYSTEM.md)
 
-### 📋 Documentation Technique
-- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** ⭐
-  - Architecture complète
-  - Schéma BD détaillé
-  - Endpoints API
-  - Code React
-  - Sécurité
-  - Checklist implémentation
+## Ports et URLs (dev)
+- Backend PHP : http://localhost/QR-reservation/backend-php
+- Admin : http://localhost:3002
+- Client : http://localhost:3003
 
-- **[CHANGELOG_AUTH_SYSTEM.md](CHANGELOG_AUTH_SYSTEM.md)** ⭐
-  - Historique des modifications
-  - Fichiers modifiés/créés
-  - SQL migrations
-  - Résumé des changements
+## Scripts utiles
+- Tests API : `test-login.ps1`, `test-auth.ps1`
+- Commandes : `test-commande-restaurant.ps1`, `test-commande-restaurant-2.ps1`
+- Génération QR : `generate-qr.html`
 
-- **[AUTH_SYSTEM_README.md](AUTH_SYSTEM_README.md)**
-  - Résumé des changements BD
-  - Endpoints et formats
-  - Fichiers clés
+## Fichiers clés
+- Backend : `backend-php/index.php`, `backend-php/db.php`, `backend-php/encryption.php`
+- Frontend admin : `frontend-admin/src/context/AuthContext.js`, `frontend-admin/src/components/{Dashboard,Stats,Login}.js`, `frontend-admin/src/App.js`
+- Frontend client : `frontend-client/src/components/{Scanner,Menu,Panier,Confirmation}.js`
 
-### 🚀 Guides d'Utilisation
-- **[QUICKSTART.md](QUICKSTART.md)** ⭐
-  - 5 étapes pour démarrer
-  - Vérification fonctionnement
-  - Notes importantes
-  - Dépannage rapide
-
-- **[README_AUTH_SYSTEM.md](README_AUTH_SYSTEM.md)** ⭐
-  - Vue d'ensemble
-  - Nouvelles fonctionnalités
-  - Architecture
-  - Checklist
-  - Prochaines étapes
-
-### 🛠️ Outils
-- **[migrate-db.html](migrate-db.html)** ⭐
-  - Interface web pour réinitialiser BD
-  - Test d'authentification
-  - Pas besoin d'IDE
-
-- **[test-auth.ps1](test-auth.ps1)**
-  - Tests API via PowerShell
-  - 4 tests d'endpoints
-  - Affichage colorisé
-
----
-
-## 📁 Fichiers Par Fonction
-
-### Backend PHP (À Connaître)
-```
-backend-php/
-├── db.php                    → Tables + Migrations
-├── index.php                 → Endpoints API
-└── encryption.php            → Chiffrement données
-```
-
-**Lectures recommandées:**
-1. [IMPLEMENTATION_SUMMARY.md - Section Base de Données](IMPLEMENTATION_SUMMARY.md#-modifications-base-de-données)
-2. [IMPLEMENTATION_SUMMARY.md - Section Endpoints](IMPLEMENTATION_SUMMARY.md#-endpoints-dauthentification-backend)
-3. [CONFIGURATION.md - MySQL Configuration](CONFIGURATION.md#mysql-configuration-production)
-
-### Frontend React (À Connaître)
-```
-frontend-admin/
-├── src/
-│   ├── context/AuthContext.js     → Gestion auth
-│   ├── components/Login.js         → Formulaire login
-│   ├── components/Dashboard.js     → Modifié pour auth
-│   ├── components/Stats.js         → Modifié pour auth
-│   ├── App.js                      → Routes protégées
-│   └── index.js                    → AuthProvider
-```
-
-**Lectures recommandées:**
-1. [IMPLEMENTATION_SUMMARY.md - Section Frontend](IMPLEMENTATION_SUMMARY.md#-frontend-react)
-2. [IMPLEMENTATION_SUMMARY.md - Section Intégration](IMPLEMENTATION_SUMMARY.md#-intégration-frontend---modifications)
-
----
-
-## 🔍 Recherche par Sujet
-
-### 🔐 Authentification & Sécurité
-- Tokens: [IMPLEMENTATION_SUMMARY.md - Tokens](IMPLEMENTATION_SUMMARY.md#2-token-management)
-- Hashage: [CONFIGURATION.md - Passwords](CONFIGURATION.md#passwords-hachés-avec-bcrypt)
-- Flux auth: [CHANGELOG_AUTH_SYSTEM.md - Flux](CHANGELOG_AUTH_SYSTEM.md#-flux-dauthentification)
-- Bonnes pratiques: [IMPLEMENTATION_SUMMARY.md - Sécurité](IMPLEMENTATION_SUMMARY.md#-sécurité)
-
-### 🗄️ Base de Données
-- Schéma: [IMPLEMENTATION_SUMMARY.md - BD](IMPLEMENTATION_SUMMARY.md#-modifications-base-de-données)
-- Migration: [CHANGELOG_AUTH_SYSTEM.md - Migration SQL](CHANGELOG_AUTH_SYSTEM.md#migration-sql-effectuée-via-endpoint-post-apidbreset)
-- Configuration: [CONFIGURATION.md - MySQL](CONFIGURATION.md#mysql-configuration-production)
-
-### 🌐 API & Endpoints
-- Endpoints: [IMPLEMENTATION_SUMMARY.md - Endpoints](IMPLEMENTATION_SUMMARY.md#-endpoints-dauthentification-backend)
-- Exemples cURL: [IMPLEMENTATION_SUMMARY.md - Exemples](IMPLEMENTATION_SUMMARY.md#1-postnot-an-api-auth-login)
-- Endpoints protégés: [IMPLEMENTATION_SUMMARY.md - Endpoints Protégés](IMPLEMENTATION_SUMMARY.md#-endpoints-protégés)
-
-### 🎨 Frontend & UI
-- Composant Login: [IMPLEMENTATION_SUMMARY.md - Login](IMPLEMENTATION_SUMMARY.md#2-composant-login-frontend-adminsrccomponentsloginjs)
-- Context Auth: [IMPLEMENTATION_SUMMARY.md - Context](IMPLEMENTATION_SUMMARY.md#1-context-dauthentification-frontend-adminsrccontextauthcontextjs)
-- Routes: [IMPLEMENTATION_SUMMARY.md - Routes Protégées](IMPLEMENTATION_SUMMARY.md#3-routes-protégées-frontend-adminsrcappjs)
-
-### 🧪 Tests & Déploiement
-- Tests: [QUICKSTART.md - Vérification](QUICKSTART.md#verification-de-fonctionnement)
-- Déploiement: [deploy.ps1](deploy.ps1) / [deploy.sh](deploy.sh)
-- Dépannage: [QUICKSTART.md - Dépannage](QUICKSTART.md#-dépannage)
-
----
-
-## 📊 Résumé des Fichiers
-
-| Fichier | Type | Taille | Priorité |
-|---------|------|--------|----------|
-| QUICKSTART.md | Guide | Court | ⭐⭐⭐ |
-| README_AUTH_SYSTEM.md | Vue globale | Moyen | ⭐⭐⭐ |
-| IMPLEMENTATION_SUMMARY.md | Doc technique | Long | ⭐⭐ |
-| CONFIGURATION.md | Référence | Moyen | ⭐⭐ |
-| CHANGELOG_AUTH_SYSTEM.md | Historique | Long | ⭐ |
-| AUTH_SYSTEM_README.md | Résumé | Court | ⭐ |
-| migrate-db.html | Outil | Autonome | ⭐⭐ |
-| deploy.ps1 | Automatisation | Script | ⭐ |
-| test-auth.ps1 | Tests | Script | ⭐ |
-
----
-
-## 🎯 Parcours de Lecture Recommandé
-
-### Pour Démarrer Immédiatement
-1. ✅ [QUICKSTART.md](QUICKSTART.md) (5 min)
-2. ✅ [migrate-db.html](migrate-db.html) (Réinitialiser BD)
-3. ✅ Lancer frontend: `npm start`
-4. ✅ Tester login: `admin@demo.local` / `demo123`
-
-### Pour Comprendre le Système
-1. 📖 [README_AUTH_SYSTEM.md](README_AUTH_SYSTEM.md) (10 min)
-2. 📖 [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Sections clés (20 min)
-3. 🔍 [CONFIGURATION.md](CONFIGURATION.md) - Production setup (15 min)
-
-### Pour Maintenir/Modifier
-1. 📝 [CHANGELOG_AUTH_SYSTEM.md](CHANGELOG_AUTH_SYSTEM.md) - Comprendre les changements (15 min)
-2. 💻 [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Code complet (30 min)
-3. 🛠️ [CONFIGURATION.md](CONFIGURATION.md) - Configuration avancée (15 min)
-
----
-
-## ✅ Checklist pour Démarrer
-
-- [ ] J'ai lu [QUICKSTART.md](QUICKSTART.md)
-- [ ] J'ai accédé à [migrate-db.html](migrate-db.html) et réinitialisé la BD
-- [ ] J'ai lancé `npm start` dans `frontend-admin`
-- [ ] Je me suis connecté avec `admin@demo.local` / `demo123`
-- [ ] J'ai créé un nouveau restaurant via l'inscription
-- [ ] J'ai lu [README_AUTH_SYSTEM.md](README_AUTH_SYSTEM.md)
-- [ ] Je comprends l'architecture globale
-
-**Si tous les points sont cochés, vous êtes prêt!** ✨
-
----
-
-## 🆘 Besoin d'Aide?
-
-| Question | Document |
-|----------|----------|
-| Comment démarrer? | [QUICKSTART.md](QUICKSTART.md) |
-| Comment configurer? | [CONFIGURATION.md](CONFIGURATION.md) |
-| Qu'est-ce qui a changé? | [CHANGELOG_AUTH_SYSTEM.md](CHANGELOG_AUTH_SYSTEM.md) |
-| Comment fonctionne l'auth? | [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) |
-| Comment déployer en prod? | [CONFIGURATION.md - Production](CONFIGURATION.md#configuration-production) |
-| Erreur d'authentification? | [QUICKSTART.md - Dépannage](QUICKSTART.md#-dépannage) |
-
----
-
-## 🔗 Ressources Externes
-
-- **PHP Password Hash**: https://www.php.net/manual/en/function.password-hash.php
-- **React Context**: https://react.dev/reference/react/useContext
-- **Base64**: https://en.wikipedia.org/wiki/Base64
-- **JWT Tokens** (pour future amélioration): https://jwt.io
-
----
-
-## 📞 Support
-
-Pour les questions spécifiques:
+## Check rapide
+- Frontends pointent vers `REACT_APP_API_URL=http://localhost/QR-reservation/backend-php`
+- Ports fixés : 3002 (admin) / 3003 (client)
+- QR contiennent `restaurant` + `table`
 1. Cherchez dans les documents ci-dessus
 2. Consultez le fichier [QUICKSTART.md - Dépannage](QUICKSTART.md#-dépannage)
 3. Exécutez [test-auth.ps1](test-auth.ps1) ou [deploy.ps1](deploy.ps1)

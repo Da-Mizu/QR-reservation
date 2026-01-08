@@ -1,202 +1,26 @@
-# 📝 Historique des Modifications - Système d'Authentification
+# Changelog Auth/Multi-Restaurant
 
-## Session: Ajout du Système d'Authentification Multi-Restaurant
+## Ajouts principaux
+- Table `restaurants` (hash mot de passe), FKs `restaurant_id` sur produits/commandes.
+- Endpoints auth : login/register/verify/logout avec token `base64(restaurant_id:email:timestamp)` (7j).
+- Filtrage des commandes/stats par restaurant_id (token prioritaire, fallback 1).
+- CORS expose `Authorization`, `.htaccess` gère PATH_INFO.
 
-### Date: 2024
-### Objectif: Permettre à plusieurs restaurants d'utiliser la plateforme avec isolation des données
+## Frontends
+- Admin : AuthContext, Login, routes protégées, Dashboard/Stats utilisent le token.
+- Client : Scanner lit `restaurant`/`table`, Menu/Panier/Confirmation envoient `restaurant_id` et récupèrent la commande avec `?restaurant` si pas de token.
 
----
+## Ports / URLs
+- Backend PHP : http://localhost/QR-reservation/backend-php
+- Admin : http://localhost:3002
+- Client : http://localhost:3003
 
-## 🗄️ Base de Données
+## Comptes démo
+- admin@demo.local / demo123 (restaurant 1)
+- testresto@demo.local / test123 (restaurant 2)
 
-### backend-php/db.php
-**Modifications:**
-1. ✨ **Nouvelle table `restaurants`**
-   - Stocke nom, email, password_hash (bcrypt), telephone, adresse
-   - Restaurant par défaut: `admin@demo.local` / `demo123`
-
-2. ✏️ **Migrations pour tables existantes**
-   - Table `produits`: Ajout colonne `restaurant_id` INT NOT NULL DEFAULT 1
-   - Table `commandes`: Ajout colonne `restaurant_id` INT NOT NULL DEFAULT 1
-   - Ajout des Foreign Keys vers `restaurants(id)` avec CASCADE DELETE
-
-3. ✨ **Fonction de seed de produits**
-   - Les produits initiaux sont assignés au restaurant par défaut
-
-### Migration SQL (Effectuée via endpoint POST /api/db/reset)
-```sql
-DROP TABLE IF EXISTS commande_items;
-DROP TABLE IF EXISTS commandes;
-DROP TABLE IF EXISTS produits;
-DROP TABLE IF EXISTS restaurants;
-
-CREATE TABLE restaurants (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    telephone VARCHAR(20),
-    adresse TEXT,
-    actif TINYINT(1) DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE produits (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    nom VARCHAR(255) NOT NULL,
-    description TEXT,
-    prix DECIMAL(10,2) NOT NULL,
-    disponible TINYINT(1) DEFAULT 1,
-    image TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
-);
-
-CREATE TABLE commandes (
-    id VARCHAR(50) PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    nom TEXT NOT NULL,
-    email TEXT,
-    telephone TEXT,
-    table_number VARCHAR(50),
-    total DECIMAL(10,2) NOT NULL,
-    statut VARCHAR(50) DEFAULT 'en_attente',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
-);
-
-CREATE TABLE commande_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    commande_id VARCHAR(50) NOT NULL,
-    produit_id INT NOT NULL,
-    quantite INT NOT NULL DEFAULT 1,
-    prix DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (commande_id) REFERENCES commandes(id) ON DELETE CASCADE,
-    FOREIGN KEY (produit_id) REFERENCES produits(id)
-);
-```
-
----
-
-## 🔐 API Backend
-
-### backend-php/index.php
-
-#### ✨ Nouvelles Fonctions
-1. **getAuthToken()** - Extrait le token du header Authorization
-2. **verifyAuthToken($token)** - Vérifie et décode le token
-
-#### ✨ Nouveaux Endpoints
-
-**1. POST /api/auth/login**
-- Accepte: `{"email":"...", "motdepasse":"..."}`
-- Retourne: `{"token":"...", "restaurant_id":1, "email":"..."}`
-- Hash validation avec `password_verify()`
-
-**2. POST /api/auth/register**
-- Accepte: `{"nom":"...", "email":"...", "motdepasse":"..."}`
-- Retourne: `{"token":"...", "restaurant_id":X, "message":"..."}`
-- Hash du mot de passe avec `password_hash()`
-- Vérification des doublons (email/nom)
-
-**3. GET /api/auth/verify**
-- Vérifie la validité du token
-- Retourne: `{"restaurant_id":X, "email":"...", "timestamp":...}`
-- Contrôle l'expiration (7 jours)
-
-**4. POST /api/auth/logout**
-- Endpoint simple (logout réel fait côté client)
-
-#### ✏️ Endpoints Modifiés
-
-**GET/POST /api/commandes**
-- Récupère le `restaurant_id` du token
-- Filtre: `WHERE restaurant_id = ? `
-- Default: `restaurant_id = 1` (backward compatible)
-
-**PATCH /api/commandes/{id}/statut**
-- Vérification: `WHERE id = ? AND restaurant_id = ?`
-
-**GET /api/stats**
-- Stats filtrées par restaurant_id
-
-**GET /api/stats/tables**, **/jours**, **/produits**
-- Toutes les stats filtrées par restaurant_id
-
-#### ✨ Endpoint Migration
-- **POST /api/db/reset** - Réinitialise la BD avec le nouveau schéma
-
----
-
-## 💻 Frontend React
-
-### frontend-admin/src/context/AuthContext.js
-✨ **NOUVEAU FILE**
-
-Features:
-- `useContext(AuthContext)` pour accéder à l'auth globale
-- State: `user` (restaurantId, email), `token`, `loading`
-- Méthodes: `login(token, restaurantId, email)`, `logout()`
-- localStorage persistence: `auth_token` + `auth_user`
-- Auto-charge du token au montage du composant
-
-```javascript
-const { user, token, login, logout, loading } = useContext(AuthContext);
-```
-
-### frontend-admin/src/components/Login.js
-✨ **NOUVEAU FILE**
-
-Features:
-- Formulaire avec 2 modes: Connexion / Inscription
-- Input: Email, Mot de passe (+ Nom pour inscription)
-- Gestion erreurs et états loading
-- Affichage des identifiants démo
-- Redirection vers Dashboard après succès
-- Utilise `REACT_APP_API_URL` du `.env`
-
-### frontend-admin/src/components/Login.css
-✨ **NOUVEAU FILE**
-
-Styles Bootstrap pour:
-- Card centrée
-- Boutons et inputs
-- Liens de transition mode login/inscription
-
-### frontend-admin/src/App.js
-✏️ **MODIFIÉ**
-
-Changes:
-1. Import `useContext` et `AuthContext`
-2. Import `Login` component
-3. Import `Navigate` et `useContext`
-4. Ajout du composant `ProtectedRoute`
-5. Navigation conditionnelle (affichée seulement si connecté)
-6. Affichage du email et bouton déconnexion dans Navbar
-7. Routes protégées:
-   - `/login` - Public (redirige vers `/` si connecté)
-   - `/` - Protégé (Dashboard)
-   - `/stats` - Protégé (Stats)
-
-### frontend-admin/src/App.css
-✏️ **MODIFIÉ**
-
-Additions:
-- `.nav-user` - Conteneur pour email + bouton
-- `.user-email` - Affichage email du restaurant
-- `.btn-logout` - Bouton déconnexion stylisé
-
-### frontend-admin/src/index.js
-✏️ **MODIFIÉ**
-
-Changes:
-- Import `AuthProvider` du contexte
-- Wrapper de l'App avec `<AuthProvider>`
-
-### frontend-admin/src/components/Dashboard.js
-✏️ **MODIFIÉ**
+## Scripts de test
+- `test-login.ps1`, `test-auth.ps1`, `test-commande-restaurant.ps1`, `test-commande-restaurant-2.ps1`
 
 Changes:
 1. Import `useContext` + `AuthContext`

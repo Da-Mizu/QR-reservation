@@ -68,102 +68,77 @@ L'application client sera accessible sur `http://localhost:3000`
 ### Frontend Admin
 
 1. Naviguer dans le dossier frontend-admin :
-```bash
-cd frontend-admin
-```
-
-2. Installer les dépendances :
-```bash
-npm install
-```
-
 3. Démarrer l'application :
+
+2. Parcourir le menu et ajouter des articles au panier
+QR Reservation est une application de commande par QR code avec multi‑restaurant. Backend PHP/MySQL (XAMPP/Apache) et deux frontends React : admin (gestion des commandes) et client (scan QR, menu, panier).
+
+## Aperçu rapide
+- Backend : `backend-php/` (Apache/PHP, MySQL). Base URL par défaut : `http://localhost/QR-reservation/backend-php`.
+- Frontend admin : `frontend-admin` sur le port 3002 (login admin, commandes, stats).
+- Frontend client : `frontend-client` sur le port 3003 (scan QR, menu, panier, confirmation).
+- QR : les liens contiennent `restaurant=<id>` et `table=<num>`. Exemple : `http://localhost:3003/menu?restaurant=2&table=12`.
+- Comptes démo : `admin@demo.local / demo123` (restaurant 1) et `testresto@demo.local / test123` (restaurant 2).
+
+## Prérequis
+- Node.js 18+
+- npm
+- PHP 8+ avec extensions PDO MySQL (XAMPP convient)
+- MySQL (BDD `qr_reservation` par défaut)
+
+## Démarrage rapide (dev)
 ```bash
+# Backend PHP (via Apache/XAMPP) : placer le dossier dans htdocs et accéder à /QR-reservation/backend-php
+
+# Admin (port 3002)
+cd frontend-admin
+npm install
+npm start
+
+# Client (port 3003)
+cd frontend-client
+npm install
 npm start
 ```
+- Assurez-vous que `backend-php` est servi par Apache et accessible à l'URL ci-dessus. Les frontends utilisent `REACT_APP_API_URL=http://localhost/QR-reservation/backend-php`.
+- Si un port est occupé, changez `PORT` dans `.env` du frontend concerné (3002 admin, 3003 client).
 
-L'application admin sera accessible sur `http://localhost:3000` (ou un autre port si 3000 est occupé)
+## Flux principal
+1) Générer/afficher un QR : ouvrez `generate-qr.html`, saisissez `restaurantId` et `table`. Le lien encode ces deux paramètres.
+2) Scanner côté client : le scanner récupère `restaurant` et `table`, les stocke et redirige vers `/menu`.
+3) Menu/Panier : ajoute des articles, poste une commande avec `restaurant_id`.
+4) Confirmation : récupère la commande avec l'ID et `?restaurant=<id>` si aucun token n'est présent.
+5) Admin : connexion, visualisation des commandes filtrées par restaurant (token), statistiques.
 
-## 📖 Utilisation
+## Scripts utiles (PowerShell)
+- `test-login.ps1` : vérifie l'auth login.
+- `test-auth.ps1` : login, verify, commandes, stats.
+- `test-commande-restaurant.ps1` : crée une commande pour restaurant 1.
+- `test-commande-restaurant-2.ps1` : crée une commande pour restaurant 2.
 
-### Pour les clients
+## Configuration
+- Backend : voir `CONFIGURATION.md` pour les variables DB (DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME).
+- Frontends : `frontend-admin/.env` et `frontend-client/.env` (API URL et ports).
+- Auth : jeton base64(restaurant_id:email:timestamp), validité 7 jours. Endpoints :
+  - POST `/api/auth/login`
+  - POST `/api/auth/register`
+  - GET `/api/auth/verify`
+  - POST `/api/auth/logout`
 
-1. Scanner le QR code affiché sur la table
-2. Parcourir le menu et ajouter des articles au panier
-3. Remplir les informations de contact (nom requis)
-4. Valider la commande
-5. Recevoir une confirmation avec le numéro de commande
+## Déploiement (idées rapides)
+- Servir `backend-php` derrière Apache avec mod_rewrite (voir `.htaccess`).
+- Construire les frontends (`npm run build`) et déployer les dossiers `build/` derrière un serveur statique ou un vhost Apache/Nginx pointant sur `/menu` et `/` (admin) avec fallback React.
 
-### Pour le gérant
+## Dépannage
+- Port occupé : ajuster `PORT` dans `.env` du frontend.
+- CORS/Authorization : l'en-tête `Authorization` est déjà exposé côté backend.
+- Commande non trouvée après scan : vérifier que l'URL contient `restaurant=<id>` ou que le token d'admin est présent.
 
-1. Accéder à l'interface d'administration
-2. Visualiser toutes les commandes en temps réel
-3. Filtrer les commandes par statut
-4. Mettre à jour le statut des commandes :
-   - En attente → En préparation → Prête → Terminée
-5. Consulter les statistiques (nombre de commandes, revenus, etc.)
-
-## 🔌 API Endpoints
-
-### Produits
-- `GET /api/produits` - Obtenir tous les produits disponibles
-- `GET /api/produits/:id` - Obtenir un produit par ID
-
-### Commandes
-- `GET /api/commandes` - Obtenir toutes les commandes (pour le gérant)
-- `GET /api/commandes/:id` - Obtenir une commande par ID
-- `POST /api/commandes` - Créer une nouvelle commande
-- `PATCH /api/commandes/:id/statut` - Mettre à jour le statut d'une commande
-
-## 🎨 Personnalisation
-
-### Changer le style
-
-Chaque frontend (client et admin) peut être personnalisé indépendamment :
-
-- **Frontend Client** : Modifier les fichiers CSS dans `frontend-client/src/components/`
-- **Frontend Admin** : Modifier les fichiers CSS dans `frontend-admin/src/components/`
-
-### Ajouter des produits
-
-Les produits sont stockés dans la base de données SQLite. Vous pouvez :
-1. Les ajouter via l'API
-2. Les modifier directement dans la base de données
-3. Ajouter une interface d'administration pour gérer les produits
-
-## 📝 Notes
-
-- La base de données SQLite est créée automatiquement au premier démarrage du backend
-- Des produits d'exemple sont ajoutés automatiquement
-- Le panier est sauvegardé dans le localStorage du navigateur
-- L'auto-refresh est activé par défaut dans l'interface admin (rafraîchit toutes les 5 secondes)
-
-### Base de données (SQLite) et chiffrement à froid
-
-- **Fichier de la base de données :** le fichier SQLite est créé dans le dossier `backend` sous le nom `database.sqlite` (chemin : `backend/database.sqlite`). Le backend l'ouvre via `path.join(__dirname, 'database.sqlite')` dans `backend/server.js`.
-- **Chiffrement à froid (optionnel) :** une couche d'encryptage applicatif a été ajoutée pour chiffrer certains champs sensibles avant écriture (ex. `nom`, `email`, `telephone`, `items`).
-- **Variable d'environnement :** pour activer le chiffrement définissez `DB_ENCRYPTION_KEY`. Recommandation : une clé 32-octets encodée en base64.
-
-   - Générer une clé 32-octets (Node.js) :
-      ```bash
-      node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-      ```
-
-   - Exemple (PowerShell) :
-      ```powershell
-      $env:DB_ENCRYPTION_KEY = '<votre_cle_base64>'
-      npm start
-      ```
-
-   - Exemple (Linux / macOS) :
-      ```bash
-      export DB_ENCRYPTION_KEY='<votre_cle_base64>'
-      npm start
-      ```
-
-- **Comportement si non défini :** si `DB_ENCRYPTION_KEY` n'est pas défini, le chiffrement est désactivé et une alerte est affichée au démarrage. Le système est rétro-compatible : les valeurs non préfixées restent lisibles.
-
-## 🔒 Sécurité
+## Autres documents
+- `QUICKSTART.md` : pas-à-pas concis.
+- `CONFIGURATION.md` : variables d'environnement et URLs.
+- `IMPLEMENTATION_SUMMARY.md` : architecture et choix techniques.
+- `CHANGELOG_AUTH_SYSTEM.md` : historique rapide de l'auth et multi-restaurant.
 
 ⚠️ **Note importante** : Cette application est conçue pour un usage en développement ou dans un environnement contrôlé. Pour un déploiement en production, considérez :
 

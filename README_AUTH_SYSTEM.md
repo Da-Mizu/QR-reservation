@@ -1,203 +1,34 @@
-# 🎯 QR Reservation - Système d'Authentification Multi-Restaurant
+# README - Système d'Authentification
 
-## 📖 Qu'est-ce que c'est?
+Authentification multi-restaurant pour QR Reservation (backend PHP/MySQL, frontends React).
 
-Un système d'authentification complet a été implanté pour permettre à plusieurs restaurants d'utiliser la même plateforme QR Reservation en toute isolation des données.
+## Endpoints
+- POST `/api/auth/login`
+- POST `/api/auth/register`
+- GET `/api/auth/verify`
+- POST `/api/auth/logout`
 
-**Chaque restaurant peut maintenant:**
-- Se connecter avec ses identifiants
-- Voir uniquement ses commandes
-- Consulter ses statistiques
-- Gérer ses produits
-- Aucun accès aux données d'autres restaurants
+Token : `base64(restaurant_id:email:timestamp)` (7 jours), envoyé en `Authorization: Bearer`.
 
----
+## Comptes démo
+- admin@demo.local / demo123 (restaurant 1)
+- testresto@demo.local / test123 (restaurant 2)
 
-## 🚀 Démarrer Immédiatement
+## Ports / URLs (dev)
+- Backend : http://localhost/QR-reservation/backend-php
+- Admin : http://localhost:3002
+- Client : http://localhost:3003
 
-### 1️⃣ Réinitialiser la Base de Données
-```
-http://localhost/QR-reservation/migrate-db.html
-→ Cliquer "Réinitialiser la BD"
-```
+## Fichiers clés
+- `backend-php/index.php`, `backend-php/db.php`
+- `frontend-admin/src/context/AuthContext.js`, `frontend-admin/src/components/Login.js`
+- `frontend-client/src/components/Scanner.js`
 
-### 2️⃣ Démarrer le Frontend Admin
-```bash
-cd frontend-admin
-npm start
-# Ouvrira http://localhost:3002/login
-```
-
-### 3️⃣ Se Connecter
-- **Email**: `admin@demo.local`
-- **Mot de passe**: `demo123`
-
-C'est tout! Vous avez accès au dashboard avec authentification. 🎉
-
----
-
-## 📂 Fichiers de Documentation
-
-### Pour les Utilisateurs
-- **[QUICKSTART.md](QUICKSTART.md)** - Guide de démarrage rapide
-- **[migrate-db.html](migrate-db.html)** - Interface de migration BD
-
-### Pour les Développeurs
-- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Documentation technique complète
-- **[AUTH_SYSTEM_README.md](AUTH_SYSTEM_README.md)** - Architecture authentification
-
----
-
-## ✨ Nouvelles Fonctionnalités
-
-### Backend (PHP)
-
-| Fichier | Modifications |
-|---------|--------------|
-| `backend-php/db.php` | ✨ Table `restaurants` + migrations |
-| `backend-php/index.php` | ✨ 4 endpoints auth + filtrage données |
-| `backend-php/encryption.php` | (Inchangé, fonctionne toujours) |
-
-**Endpoints d'authentification:**
-- `POST /api/auth/login` - Connexion
-- `POST /api/auth/register` - Inscription nouveau restaurant
-- `GET /api/auth/verify` - Vérifier token
-- `POST /api/auth/logout` - Déconnexion
-
-**Filtrage automatique par restaurant:**
-- Toutes les commandes filtrées par `restaurant_id`
-- Toutes les statistiques isolées par restaurant
-- Backward compatible (utilise `restaurant_id=1` sans token)
-
-### Frontend (React)
-
-| Fichier | Modifications |
-|---------|--------------|
-| `frontend-admin/src/context/AuthContext.js` | ✨ NOUVEAU - Gestion globale auth |
-| `frontend-admin/src/components/Login.js` | ✨ NOUVEAU - Formulaire connexion |
-| `frontend-admin/src/App.js` | ✏️ Routes protégées |
-| `frontend-admin/src/components/Dashboard.js` | ✏️ Utilise token Bearer |
-| `frontend-admin/src/components/Stats.js` | ✏️ Utilise token Bearer |
-| `frontend-admin/src/index.js` | ✏️ AuthProvider wrapper |
-
-**Nouvelles fonctionnalités UI:**
-- Page de login/inscription dédiée
-- Affichage email du restaurant en navigation
-- Bouton déconnexion (🚪)
-- Stockage token en localStorage
-- Routes automatiquement protégées
-
----
-
-## 🔐 Sécurité
-
-### Hashage des Mots de Passe
-- Algorithme: **bcrypt** (PASSWORD_DEFAULT)
-- Automatiquement sécurisé par PHP
-
-### Token
-- Format: `base64(restaurant_id:email:timestamp)`
-- Expiration: **7 jours**
-- Transport: **Bearer token** en header Authorization
-- Stockage: **localStorage** (secure pour démo)
-
-### Isolation Données
-- Chaque endpoint vérifie le `restaurant_id` du token
-- Impossible d'accéder aux données d'un autre restaurant
-- Foreign keys enforçées au niveau BD
-
----
-
-## 📊 Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Frontend React                        │
-│  ┌──────────────────────────────────────────────────┐   │
-│  │  AuthContext (localStorage + state global)      │   │
-│  │  - token, user, login(), logout()               │   │
-│  └──────────────────────────────────────────────────┘   │
-│         ↓                          ↓                     │
-│   ┌─────────────┐         ┌────────────────┐            │
-│   │ Login Page  │         │ Dashboard      │            │
-│   │ Register    │         │ Stats          │            │
-│   └─────────────┘         └────────────────┘            │
-│         ↓ (POST)            ↓ (GET + Bearer token)      │
-└─────────────────────────────────────────────────────────┘
-                      ↓
-         ┌────────────────────────────────────┐
-         │  Backend PHP API                   │
-         ├────────────────────────────────────┤
-         │ /api/auth/login          [POST]    │
-         │ /api/auth/register       [POST]    │
-         │ /api/auth/verify         [GET]     │
-         │ /api/commandes           [GET]     │ (filtrées)
-         │ /api/stats               [GET]     │ (filtrées)
-         │ ... tous les endpoints ... [GET]   │
-         └────────────────────────────────────┘
-                      ↓
-         ┌────────────────────────────────────┐
-         │  MySQL Database                    │
-         ├────────────────────────────────────┤
-         │ restaurants                        │
-         │ ├─ id, nom, email                 │
-         │ ├─ password_hash, telephone       │
-         │ └─ adresse, actif                 │
-         │                                    │
-         │ produits (restaurant_id FK)       │
-         │ commandes (restaurant_id FK)      │
-         │ commande_items                    │
-         └────────────────────────────────────┘
-```
-
----
-
-## 🧪 Tests
-
-### Vérification Rapide
-```bash
-# 1. Via Interface
-http://localhost/QR-reservation/migrate-db.html
-# Cliquer "Tester l'authentification"
-
-# 2. Via Terminal/PowerShell
-powershell -File test-auth.ps1
-
-# 3. Via cURL
-curl -X POST http://localhost/QR-reservation/backend-php/index.php/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@demo.local","motdepasse":"demo123"}'
-```
-
----
-
-## 📋 Checklist Implémentation
-
-- [x] Table `restaurants` créée avec mot de passe hashé
-- [x] Colonnes `restaurant_id` ajoutées avec FKs
-- [x] Endpoints d'authentification implémentés
-- [x] Gestion token (base64 + expiration 7j)
-- [x] AuthContext React créé
-- [x] Composant Login avec inscription
-- [x] Routes protégées implémentées
-- [x] Intégration token dans les appels API
-- [x] Navbar avec email + déconnexion
-- [x] localStorage persistence
-- [x] Outil migration BD HTML
-- [x] Tests et vérification
-- [x] Documentation complète
-
----
-
-## 🚀 Étapes Suivantes (Optionnel)
-
-### Court Terme
-1. Tester le système en accédant à `http://localhost:3002/login`
-2. Créer un nouveau restaurant via l'inscription
-3. Vérifier l'isolation des données
-
-### Moyen Terme (Production)
-1. **HTTPS**: Obtenir un certificat SSL
+## Liens utiles
+- Aperçu & flux : [README.md](README.md)
+- Démarrage rapide : [QUICKSTART.md](QUICKSTART.md)
+- Config : [CONFIGURATION.md](CONFIGURATION.md)
+- Résumé technique : [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)
 2. **JWT**: Remplacer base64 par JWT tokens
 3. **Email Verification**: Vérifier les emails à l'inscription
 4. **Password Reset**: Système de récupération mot de passe

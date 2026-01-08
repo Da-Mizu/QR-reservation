@@ -15,162 +15,49 @@ curl -X POST http://localhost/QR-reservation/backend-php/index.php/api/db/reset 
 ```
 
 ### Étape 2: Démarrer le Frontend Admin
+# Quickstart
 
+## Prérequis
+- Node 18+ et npm
+- PHP 8+ avec PDO MySQL (XAMPP convient)
+- MySQL (BDD par défaut `qr_reservation`)
+
+## URLs et ports (dev)
+- Backend PHP : http://localhost/QR-reservation/backend-php
+- Frontend admin : http://localhost:3002
+- Frontend client : http://localhost:3003
+
+## Backend PHP (Apache/XAMPP)
+- Placez le dossier dans `htdocs/QR-reservation/backend-php`.
+- Vérifiez l'accès en appelant un endpoint (ex: `/api/auth/login`).
+
+## Frontends
 ```bash
-cd c:/xampp/htdocs/QR-reservation/frontend-admin
+# Admin
+cd frontend-admin
+npm install
+npm start
+
+# Client
+cd ../frontend-client
+npm install
 npm start
 ```
+Ports configurables via `.env` (PORT=3002 admin, PORT=3003 client).
 
-Le navigateur devrait automatiquement ouvrir `http://localhost:3002`
+## Comptes démo
+- admin@demo.local / demo123 (restaurant 1)
+- testresto@demo.local / test123 (restaurant 2)
 
-### Étape 3: Se Connecter
+## Générer et tester un QR
+1) Ouvrir `generate-qr.html` et saisir `restaurantId` + `table`.
+2) Scanner avec le frontend client → redirection vers `/menu?restaurant=...&table=...`.
+3) Ajouter des produits, valider la commande.
+4) Vérifier dans l'admin (port 3002) que la commande apparaît pour le bon restaurant.
 
-1. Vous devriez voir la page de login
-2. Identifiants de démonstration:
-   - **Email**: `admin@demo.local`
-   - **Mot de passe**: `demo123`
-3. Cliquer "Se connecter"
-4. → Accès au Dashboard des commandes
+## Scripts de test (PowerShell)
+- `test-login.ps1` : login
+- `test-auth.ps1` : login + verify + commandes + stats
+- `test-commande-restaurant.ps1` : commande resto 1
+- `test-commande-restaurant-2.ps1` : commande resto 2
 
-### Étape 4: Tester les Fonctionnalités
-
-**Dashboard (Commandes):**
-- Liste de toutes les commandes
-- Actualiser les données
-- Mettre à jour le statut des commandes
-
-**Statistiques:**
-- Vue d'ensemble des revenus
-- Statistiques par table
-- Statistiques par jour
-- Top produits
-
-**Déconnexion:**
-- Cliquer le bouton 🚪 en haut à droite
-- Redirection vers `/login`
-
-### Étape 5 (Optionnel): Créer un Nouveau Restaurant
-
-1. Sur la page de login, cliquer "S'inscrire"
-2. Remplir le formulaire:
-   - Nom du restaurant (ex: "Mon Restaurant")
-   - Email (ex: "contact@myrestaurant.com")
-   - Mot de passe (minimal 6 caractères)
-3. Cliquer "S'inscrire"
-4. → Auto-login avec le nouveau restaurant
-5. Les commandes/statistiques sont isolées par restaurant
-
----
-
-## 🔍 Verification de Fonctionnement
-
-### Test 1: Vérifier que la BD est créée
-```bash
-# Via le fichier migrate-db.html:
-# - Cliquer "Tester l'authentification"
-# - Vous devriez voir "✓ Authentification fonctionnelle!"
-```
-
-### Test 2: Vérifier les endpoints API
-```bash
-# Login
-curl -X POST http://localhost/QR-reservation/backend-php/index.php/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@demo.local","motdepasse":"demo123"}'
-
-# Copier le "token" de la réponse
-
-# Verify token
-curl -X GET http://localhost/QR-reservation/backend-php/index.php/api/auth/verify \
-  -H "Authorization: Bearer PASTE_TOKEN_HERE"
-
-# Get commandes (devraient être filtrées par restaurant)
-curl -X GET http://localhost/QR-reservation/backend-php/index.php/api/commandes \
-  -H "Authorization: Bearer PASTE_TOKEN_HERE"
-```
-
-### Test 3: Vérifier que les données sont isolées par restaurant
-
-1. Se connecter avec `admin@demo.local`
-2. Créer un restaurant via le formulaire d'inscription
-3. Les deux restaurants doivent avoir des données différentes
-
----
-
-## 📝 Notes Importantes
-
-### ✅ Ce qui est implémenté
-- [x] Système d'authentification complet
-- [x] Isolation des données par restaurant
-- [x] Contexte d'authentification React
-- [x] Composant Login avec inscription
-- [x] Routes protégées
-- [x] Stockage du token en localStorage
-- [x] Outil de migration BD
-
-### ⚠️ À Faire en Production
-- [ ] Implémenter HTTPS (SSL Certificate)
-- [ ] Ajouter un rate limiting sur les endpoints
-- [ ] Implémenter la vérification par email
-- [ ] Ajouter un système de récupération mot de passe
-- [ ] Implémenter des JWT tokens au lieu de base64
-- [ ] Ajouter un CSRF token
-- [ ] Configurer les headers CORS correctement
-- [ ] Ajouter logging/audit trail
-
----
-
-## 🐛 Dépannage
-
-### Le login ne fonctionne pas
-1. Vérifier que la BD a été réinitialisée (`migrate-db.html`)
-2. Vérifier que le serveur Apache est actif
-3. Vérifier les identifiants : `admin@demo.local` / `demo123`
-
-### "Invalid token" en se connectant
-1. Le token peut avoir expiré (7 jours)
-2. Rafraîchir la page et vous reconnecter
-3. Vérifier dans DevTools (F12) → Storage → Local Storage
-
-### "Restaurant non trouvé"
-1. Assurez-vous que les tables ont bien été créées
-2. Vérifier dans phpmyadmin que les tables `restaurants`, `produits`, `commandes` existent
-3. Réinitialiser la BD via `migrate-db.html`
-
-### Le frontend admin n'accède pas à l'API
-1. Vérifier que `REACT_APP_API_URL` est correcte dans `.env`
-2. Vérifier que le backend PHP répond: 
-   ```bash
-   curl http://localhost/QR-reservation/backend-php/index.php/api/health
-   ```
-3. Vérifier les CORS headers dans le navigateur (DevTools → Network)
-
----
-
-## 📚 Fichiers Clés
-
-| Fichier | Rôle |
-|---------|------|
-| `migrate-db.html` | Interface pour réinitialiser la BD |
-| `backend-php/db.php` | Schéma BD et migrations |
-| `backend-php/index.php` | Endpoints authentification |
-| `frontend-admin/src/context/AuthContext.js` | Gestion authentification |
-| `frontend-admin/src/components/Login.js` | Formulaire login |
-| `frontend-admin/src/App.js` | Routes protégées |
-| `IMPLEMENTATION_SUMMARY.md` | Documentation complète |
-
----
-
-## 🎯 Vérification Finale
-
-Avant de considérer le système opérationnel:
-
-1. ✅ Accédez à `http://localhost:3002/login`
-2. ✅ Connectez-vous avec `admin@demo.local` / `demo123`
-3. ✅ Vous voyez le Dashboard avec des commandes
-4. ✅ Cliquez sur "Statistiques" → Affichage des stats
-5. ✅ Cliquez sur le bouton 🚪 → Déconnecte et retour au login
-6. ✅ Créez un nouveau restaurant via "S'inscrire"
-7. ✅ Vérifiez que chaque restaurant a ses données isolées
-
-Si tous les points ci-dessus sont validés, le système est prêt pour la production! 🎉
