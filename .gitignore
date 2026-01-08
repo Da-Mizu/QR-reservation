@@ -33,3 +33,17 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+
+# Build folders
+frontend-admin/build/
+frontend-client/build/
+
+# Environment files
+frontend-admin/.env
+frontend-client/.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
