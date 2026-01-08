@@ -1,0 +1,143 @@
+.table-map-container {
+  width: 100%;
+  height: calc(100vh - 200px);
+  overflow: hidden;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 1px solid #dee2e6;
+  cursor: grab;
+  position: relative;
+  user-select: none;
+}
+
+.table-map-container:active {
+  cursor: grabbing;
+}
+
+.table-map-canvas {
+  width: 1200px;
+  height: 800px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  transition: transform 0.05s ease-out;
+}
+
+.table-item {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: grab;
+  transition: all 0.2s ease;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  font-weight: bold;
+  user-select: none;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.table-item:hover {
+  transform: translateX(-50%) translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.table-item:active {
+  cursor: grabbing;
+}
+
+.table-number {
+  font-size: 20px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.table-status {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: -5px;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.table-delete {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  background: rgba(220, 53, 69, 0.8);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 3;
+}
+
+.table-item:hover .table-delete {
+  opacity: 1;
+}
+
+.table-delete:hover {
+  background: rgba(220, 53, 69, 1);
+}
+
+.table-legend {
+  display: flex;
+  gap: 20px;
+  padding: 15px 20px;
+  background: white;
+  border-top: 1px solid #dee2e6;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.legend-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .table-map-container {
+    height: calc(100vh - 250px);
+  }
+
+  .table-item {
+    width: 60px;
+    height: 60px;
+  }
+
+  .table-number {
+    font-size: 16px;
+  }
+
+  .table-legend {
+    font-size: 12px;
+    gap: 10px;
+  }
+
+  .legend-box {
+    width: 18px;
+    height: 18px;
+  }
+}

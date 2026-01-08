@@ -9,7 +9,15 @@
     "start:admin": "cd frontend-admin && npm start",
     "dev:backend": "cd backend && npm run dev"
   },
-  "keywords": ["qr", "reservation", "restaurant", "commande"],
+  "keywords": [
+    "qr",
+    "reservation",
+    "restaurant",
+    "commande"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^3.2.0"
+  }
 }

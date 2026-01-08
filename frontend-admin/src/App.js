@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import Stats from './components/Stats';
 import Login from './components/Login';
 import QRGenerator from './components/QRGenerator';
+import TableMap from './components/TableMap';
 import { AuthContext } from './context/AuthContext';
 import './App.css';
 
@@ -40,6 +41,13 @@ function Navigation() {
             onClick={() => setMenuOpen(false)}
           >
             📱 Générer QR
+          </Link>
+          <Link 
+            to="/table-map" 
+            className={location.pathname === '/table-map' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setMenuOpen(false)}
+          >
+            🗺️ Plan du restaurant
           </Link>
           
           <div className="nav-user">
@@ -101,6 +109,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <QRGenerator />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/table-map" 
+            element={
+              <ProtectedRoute>
+                <TableMap />
               </ProtectedRoute>
             } 
           />
