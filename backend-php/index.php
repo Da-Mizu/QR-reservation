@@ -244,7 +244,7 @@ try {
         if ($method === 'PATCH' && isset($parts[2]) && isset($parts[3]) && $parts[3] === 'statut') {
             $data = json_input();
             $statut = $data['statut'] ?? null;
-            $valid = ['en_attente','en_preparation','prete','terminee','annulee'];
+            $valid = ['en_attente','en_preparation','prete','servie','en_attente_de_paiement','terminee','annulee'];
             if (!$statut || !in_array($statut, $valid, true)) respond(['error' => 'Statut invalide'], 400);
             $stmt = $pdo->prepare('UPDATE commandes SET statut = ? WHERE id = ? AND restaurant_id = ?');
             $stmt->execute([$statut, $parts[2], $restaurantId]);

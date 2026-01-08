@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Card, Button, Form, Navbar, Nav } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import './QRGenerator.css';
 
 function QRGenerator() {
@@ -106,9 +105,6 @@ function QRGenerator() {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="gap-2">
-              <Link to="/" className="btn btn-outline-secondary btn-sm">
-                ← Retour
-              </Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

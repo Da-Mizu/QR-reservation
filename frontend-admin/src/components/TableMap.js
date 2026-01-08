@@ -138,7 +138,9 @@ function TableMap() {
     const progressionStatuts = {
       'en_attente': 'en_preparation',
       'en_preparation': 'prete',
-      'prete': 'terminee',
+      'prete': 'servie',
+      'servie': 'en_attente_de_paiement',
+      'en_attente_de_paiement': 'terminee',
       'terminee': null, // Ne rien faire
       'annulee': null // Ne rien faire
     };
@@ -188,6 +190,8 @@ function TableMap() {
       'en_attente': '#FFC107',
       'en_preparation': '#17A2B8',
       'prete': '#28A745',
+      'servie': '#20C997',
+      'en_attente_de_paiement': '#007BFF',
       'terminee': '#6C757D',
       'annulee': '#DC3545'
     };
@@ -198,8 +202,8 @@ function TableMap() {
     const labels = {
       'en_attente': 'En attente',
       'en_preparation': 'Préparation',
-      'prete': 'Prête',
-      'terminee': 'Terminée',
+      'prete': 'Prête',      'servie': 'Servie',
+      'payee': 'Payée',      'terminee': 'Terminée',
       'annulee': 'Annulée'
     };
     return labels[statut] || 'Libre';
@@ -395,16 +399,20 @@ function TableMap() {
           Prête
         </div>
         <div className="legend-item">
+          <div className="legend-box" style={{ backgroundColor: '#20C997' }}></div>
+          Servie
+        </div>
+        <div className="legend-item">
+          <div className="legend-box" style={{ backgroundColor: '#007BFF' }}></div>
+          En attente de paiement
+        </div>
+        <div className="legend-item">
           <div className="legend-box" style={{ backgroundColor: '#6C757D' }}></div>
           Terminée
         </div>
         <div className="legend-item">
           <div className="legend-box" style={{ backgroundColor: '#DC3545' }}></div>
           Annulée
-        </div>
-        <div className="legend-item">
-          <div className="legend-box" style={{ backgroundColor: '#E9ECEF' }}></div>
-          Libre
         </div>
       </div>
 

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.css';
 import { AuthContext } from '../context/AuthContext';
@@ -84,9 +83,11 @@ function Dashboard() {
     en_attente: commandes.filter(c => c.statut === 'en_attente').length,
     en_preparation: commandes.filter(c => c.statut === 'en_preparation').length,
     prete: commandes.filter(c => c.statut === 'prete').length,
+    servie: commandes.filter(c => c.statut === 'servie').length,
+    en_attente_de_paiement: commandes.filter(c => c.statut === 'en_attente_de_paiement').length,
     terminee: commandes.filter(c => c.statut === 'terminee').length,
     totalRevenus: commandes
-      .filter(c => c.statut !== 'annulee')
+      .filter(c => c.statut === 'terminee')
       .reduce((sum, c) => sum + toNumber(c.total), 0)
   };
 
@@ -95,6 +96,8 @@ function Dashboard() {
       'en_attente': 'warning',
       'en_preparation': 'info',
       'prete': 'success',
+      'servie': 'success',
+      'en_attente_de_paiement': 'primary',
       'terminee': 'secondary',
       'annulee': 'danger'
     };
@@ -106,6 +109,8 @@ function Dashboard() {
       'en_attente': 'En attente',
       'en_preparation': 'En préparation',
       'prete': 'Prête',
+      'servie': 'Servie',
+      'en_attente_de_paiement': 'En attente de paiement',
       'terminee': 'Terminée',
       'annulee': 'Annulée'
     };
@@ -149,12 +154,6 @@ function Dashboard() {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="gap-2">
-              <Link 
-                to="/qr-generator"
-                className="btn btn-success btn-sm text-white text-decoration-none"
-              >
-                📱 Générer QR
-              </Link>
               <Button 
                 variant={autoRefresh ? 'success' : 'secondary'}
                 size="sm"
@@ -219,7 +218,7 @@ function Dashboard() {
       <Row className="mb-4">
         <Col>
           <div className="d-flex gap-2 flex-wrap">
-            {['toutes', 'en_attente', 'en_preparation', 'prete', 'terminee'].map(status => (
+            {['toutes', 'en_attente', 'en_preparation', 'prete', 'servie', 'en_attente_de_paiement', 'terminee'].map(status => (
               <Button
                 key={status}
                 variant={filter === status ? 'primary' : 'outline-secondary'}
@@ -322,6 +321,46 @@ function Dashboard() {
                     {commande.statut === 'prete' && (
                       <>
                         <Button 
+                          variant="success"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'servie')}
+                        >
+                          Servie
+                        </Button>
+                        <Button 
+                          variant="secondary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'en_preparation')}
+                        >
+                          Retour
+                        </Button>
+                      </>
+                    )}
+                    {commande.statut === 'servie' && (
+                      <>
+                        <Button 
+                          variant="primary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'en_attente_de_paiement')}
+                        >
+                          En attente de paiement
+                        </Button>
+                        <Button 
+                          variant="secondary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'prete')}
+                        >
+                          Retour
+                        </Button>
+                      </>
+                    )}
+                    {commande.statut === 'en_attente_de_paiement' && (
+                      <>
+                        <Button 
                           variant="primary"
                           size="sm"
                           className="flex-grow-1"
@@ -333,7 +372,19 @@ function Dashboard() {
                           variant="secondary"
                           size="sm"
                           className="flex-grow-1"
-                          onClick={() => mettreAJourStatut(commande.id, 'en_preparation')}
+                          onClick={() => mettreAJourStatut(commande.id, 'servie')}
+                        >
+                          Retour
+                        </Button>
+                      </>
+                    )}
+                    {commande.statut === 'terminee' && (
+                      <>
+                        <Button 
+                          variant="secondary"
+                          size="sm"
+                          className="flex-grow-1"
+                          onClick={() => mettreAJourStatut(commande.id, 'en_attente_de_paiement')}
                         >
                           Retour
                         </Button>
