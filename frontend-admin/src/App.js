@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import Stats from './components/Stats';
@@ -9,28 +9,37 @@ import './App.css';
 function Navigation() {
   const location = useLocation();
   const { logout, user } = useContext(AuthContext);
+  const [menuOpen, setMenuOpen] = useState(false);
   
   return (
     <nav className="admin-nav">
       <div className="nav-container">
         <h1 className="nav-title">QR Reservation - Admin</h1>
-        <div className="nav-links">
+        <button className="nav-burger" onClick={() => setMenuOpen(!menuOpen)}>
+          ☰
+        </button>
+        <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
           <Link 
             to="/" 
             className={location.pathname === '/' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setMenuOpen(false)}
           >
             📋 Commandes
           </Link>
           <Link 
             to="/stats" 
             className={location.pathname === '/stats' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setMenuOpen(false)}
           >
             📊 Statistiques
           </Link>
           
           <div className="nav-user">
             <span className="user-email">{user?.email}</span>
-            <button className="btn-logout" onClick={logout}>
+            <button className="btn-logout" onClick={() => {
+              logout();
+              setMenuOpen(false);
+            }}>
               🚪 Déconnexion
             </button>
           </div>
