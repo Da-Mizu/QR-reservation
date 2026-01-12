@@ -13,13 +13,4 @@ Liste des fonctionnalités proposées (prioriser et demande-moi d'implémenter l
 - [ ] Système de fidélité (points, codes de réduction)
 - [ ] Support multi-langue & dark mode
 
----
 
-Étapes suggérées :
-1. Choisir une fonctionnalité à implémenter en priorité
-2. Créer une branche Git dédiée
-3. Implémenter côté backend + frontend
-4. Ajouter tests et documenter
-5. Faire une PR
-
-Si tu veux, je peux commencer tout de suite sur la première fonctionnalité.
