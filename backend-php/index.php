@@ -296,6 +296,8 @@ try {
         }
     }
 
+    // (reports endpoint removed — CSV export provided client-side in Stats component)
+
     // Health
     if (isset($parts[1]) && $parts[1] === 'health') {
         respond(['status' => 'OK', 'message' => 'API fonctionnelle']);

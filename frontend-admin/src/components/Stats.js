@@ -58,6 +58,51 @@ function Stats() {
     }
   };
 
+  const exportCSV = () => {
+    const lines = [];
+    const esc = (v) => ("\"" + String(v).replace(/\"/g, '""') + "\"");
+
+    // General
+    lines.push(['Clé', 'Valeur']);
+    lines.push(['Revenus totaux', revenusTotaux.toFixed(2)]);
+    lines.push(['Total commandes', totalCommandes]);
+    lines.push(['Panier moyen', panierMoyen.toFixed(2)]);
+    lines.push([]);
+
+    // Tables
+    if (statsTables && statsTables.length) {
+      lines.push(['Table', 'Commandes', 'Revenus']);
+      statsTables.forEach(s => lines.push([s.table_number, s.nombre_commandes, parseFloat(s.revenus || 0).toFixed(2)]));
+      lines.push([]);
+    }
+
+    // Jours
+    if (statsJours && statsJours.length) {
+      lines.push(['Date', 'Commandes', 'Revenus']);
+      statsJours.forEach(s => lines.push([new Date(s.date).toLocaleDateString('fr-FR'), s.nombre_commandes, parseFloat(s.revenus || 0).toFixed(2)]));
+      lines.push([]);
+    }
+
+    // Produits
+    if (statsProduits && statsProduits.length) {
+      lines.push(['Produit', 'Commandes', 'Quantité', 'Revenus']);
+      statsProduits.forEach(s => lines.push([s.nom, s.nombre_commandes, s.quantite_totale, parseFloat(s.revenus || 0).toFixed(2)]));
+      lines.push([]);
+    }
+
+    const csv = lines.map(r => r.map(c => esc(c)).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const filename = `stats_export_${new Date().toISOString().slice(0,10)}.csv`;
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <>
@@ -140,6 +185,13 @@ function Stats() {
                 onClick={chargerStats}
               >
                 Actualiser
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={exportCSV}
+              >
+                Export CSV
               </Button>
             </Nav>
           </Navbar.Collapse>
