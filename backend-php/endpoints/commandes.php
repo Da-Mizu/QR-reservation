@@ -30,19 +30,30 @@ if ($method === 'POST' && !isset($parts[2])) {
     } elseif ($clientRestaurantId) {
         $restaurantId = (int)$clientRestaurantId;
     }
-    if (!$nom || !$items || !$total) respond(['error' => 'Nom, items et total sont requis'], 400);
-    $id = bin2hex(random_bytes(16));
-    $nomEnc = encrypt_value($nom);
-    $emailEnc = $email ? encrypt_value($email) : null;
-    $telephoneEnc = $telephone ? encrypt_value($telephone) : null;
-    $stmt = $pdo->prepare('INSERT INTO commandes (id, restaurant_id, nom, email, telephone, table_number, total, statut) VALUES (?,?,?,?,?,?,?,?)');
-    $stmt->execute([$id, $restaurantId, $nomEnc, $emailEnc, $telephoneEnc, $table_number, $total, 'en_attente']);
-    $stmtItem = $pdo->prepare('INSERT INTO commande_items (commande_id, produit_id, quantite, prix) VALUES (?,?,?,?)');
-    foreach ($items as $item) {
-        $stmtItem->execute([$id, $item['id'] ?? 0, $item['quantite'] ?? 0, $item['prix'] ?? 0]);
+    // items (array) and total are required; nom can be null (optional from admin)
+    if (!is_array($items) || count($items) === 0 || $total === null) respond(['error' => 'Items et total sont requis'], 400);
+
+    // Wrap DB operations in try/catch and log request for debugging 500 errors
+    try {
+        error_log('[QR-RESERVATION] POST /api/commandes payload: ' . json_encode($data));
+        $id = bin2hex(random_bytes(16));
+        // Ensure 'nom' is not null when inserting (DB has NOT NULL constraint)
+        $nomEnc = encrypt_value($nom ?? '');
+        $emailEnc = $email ? encrypt_value($email) : null;
+        $telephoneEnc = $telephone ? encrypt_value($telephone) : null;
+        $stmt = $pdo->prepare('INSERT INTO commandes (id, restaurant_id, nom, email, telephone, table_number, total, statut) VALUES (?,?,?,?,?,?,?,?)');
+        $stmt->execute([$id, $restaurantId, $nomEnc, $emailEnc, $telephoneEnc, $table_number, $total, 'en_attente']);
+        $stmtItem = $pdo->prepare('INSERT INTO commande_items (commande_id, produit_id, quantite, prix) VALUES (?,?,?,?)');
+        foreach ($items as $item) {
+            $stmtItem->execute([$id, $item['id'] ?? 0, $item['quantite'] ?? 0, $item['prix'] ?? 0]);
+        }
+        error_log("[QR-RESERVATION] Commande créée: id={$id} restaurant_id={$restaurantId} table={$table_number} total={$total}");
+        respond(['id' => $id, 'message' => 'Commande créée avec succès', 'restaurant_id' => (int)$restaurantId], 201);
+    } catch (Exception $e) {
+        error_log('[QR-RESERVATION] Erreur création commande: ' . $e->getMessage());
+        // Return generic 500 message but include brief hint for devs
+        respond(['error' => 'Erreur serveur lors de la création de la commande'], 500);
     }
-    error_log("[QR-RESERVATION] Commande créée: id={$id} restaurant_id={$restaurantId} table={$table_number} total={$total}");
-    respond(['id' => $id, 'message' => 'Commande créée avec succès', 'restaurant_id' => (int)$restaurantId], 201);
 }
 
 if ($method === 'GET' && !isset($parts[2])) {

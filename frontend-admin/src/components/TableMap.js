@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './TableMap.css';
 import { AuthContext } from '../context/AuthContext';
+import OrderModal from './OrderModal';
 
 // Normalise l'URL API
 const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
@@ -47,6 +48,9 @@ function TableMap() {
   const [isLocked, setIsLocked] = useState(true);
   const containerRef = useRef(null);
   const { token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedTableNumber, setSelectedTableNumber] = useState(null);
 
   // Charger les commandes
   useEffect(() => {
@@ -235,10 +239,10 @@ function TableMap() {
   };
 
   const handleTableMouseDown = (e, tableId) => {
-    if (isLocked) return; // Ne pas déplacer si verrouillé
-    
-    if (e.button === 0 && e.detail === 1) {
-      // Single click only, ignore double click
+    // Only handle dragging when map is unlocked
+    if (isLocked) return;
+
+    if (e.button === 0) {
       const rect = containerRef.current.getBoundingClientRect();
       const startX = (e.clientX - rect.left - panX) / scale;
       const startY = (e.clientY - rect.top - panY) / scale;
@@ -263,6 +267,11 @@ function TableMap() {
       document.addEventListener('mousemove', handleDrag);
       document.addEventListener('mouseup', handleEnd);
     }
+  };
+
+  const handleOrderCreated = (created) => {
+    // refresh commandes after new order
+    chargerCommandes();
   };
 
   if (loading) {
@@ -302,6 +311,15 @@ function TableMap() {
                 title={isLocked ? 'Plan verrouillé' : 'Plan déverrouillé'}
               >
                 {isLocked ? '🔒 Verrouillé' : '🔓 Déverrouillé'}
+              </Button>
+              {/* Quick table input removed — table number is set from popup */}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => { setSelectedTableNumber(null); setShowOrderModal(true); }}
+                title="Prendre une commande"
+              >
+                🧾 Prendre
               </Button>
               <Button 
                 variant="primary" 
@@ -357,14 +375,22 @@ function TableMap() {
                   backgroundColor: backgroundColor,
                   cursor: isLocked ? 'default' : 'grab',
                 }}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  incrementerStatut(table.number);
+                }}
                 onMouseDown={(e) => {
-                  if (e.button === 0 && e.detail === 2) {
-                    // Double click - incrementer statut
-                    e.stopPropagation();
-                    incrementerStatut(table.number);
-                  } else if (e.button === 0 && e.detail === 1) {
-                    // Single click - drag table
+                  // Only start drag on mousedown when unlocked
+                  if (e.button === 0 && !isLocked) {
                     handleTableMouseDown(e, table.id);
+                  }
+                }}
+                onClick={(e) => {
+                  // Open order modal on simple click when locked
+                  if (e.button === 0 && isLocked) {
+                    e.stopPropagation();
+                    setSelectedTableNumber(table.number);
+                    setShowOrderModal(true);
                   }
                 }}
                 title={`Table ${table.number} - ${getStatusLabel(status)} (Double-clic pour passer à l'étape suivante)`}
@@ -445,6 +471,12 @@ function TableMap() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <OrderModal
+        show={showOrderModal}
+        tableNumber={selectedTableNumber}
+        onClose={() => setShowOrderModal(false)}
+        onOrderCreated={handleOrderCreated}
+      />
     </>
   );
 }
