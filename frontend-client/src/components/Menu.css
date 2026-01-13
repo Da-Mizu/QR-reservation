@@ -111,6 +111,29 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
+.produit-card.unavailable {
+  opacity: 0.75;
+  filter: grayscale(40%);
+  position: relative;
+}
+
+.produit-card.unavailable::after {
+  content: "Indisponible";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.titre-indisponible {
+  text-decoration: line-through;
+  color: #999;
+}
+
 .produit-info h3 {
   color: #333;
   margin-bottom: 8px;

@@ -52,8 +52,21 @@ function Menu() {
 
   const chargerProduits = async () => {
     try {
-      const response = await axios.get(`${API_URL}/produits`);
-      setProduits(response.data.map(normalizeProduit));
+      // try to fetch all products (including unavailable). Fall back to public list if not present.
+      let response;
+      try {
+        response = await axios.get(`${API_URL}/produits/all`);
+      } catch (err) {
+        response = await axios.get(`${API_URL}/produits`);
+      }
+
+      // ensure 'disponible' is normalized (0/1 or boolean)
+      const normalized = response.data.map(p => ({
+        ...normalizeProduit(p),
+        disponible: p.disponible === 1 || p.disponible === '1' || p.disponible === true
+      }));
+
+      setProduits(normalized);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des produits:', error);
@@ -156,41 +169,48 @@ function Menu() {
       <div className="menu-layout">
         <div className="menu-main">
           <div className="produits-grid">
-            {filteredProduits.map(produit => (
-              <div key={produit.id} className="produit-card">
-                <div className="produit-info">
-                  <h3>{produit.nom}</h3>
-                  <p className="produit-description">{produit.description}</p>
-                  <p className="produit-prix">{produit.prix.toFixed(2)}€</p>
+            {filteredProduits.map(produit => {
+              const isAvailable = produit.disponible === 1 || produit.disponible === true || produit.disponible === '1';
+              return (
+                <div key={produit.id} className={`produit-card ${!isAvailable ? 'unavailable' : ''}`}>
+                  <div className="produit-info">
+                    <h3 className={!isAvailable ? 'titre-indisponible' : ''}>{produit.nom}</h3>
+                    <p className="produit-description">{produit.description}</p>
+                    <p className="produit-prix">{produit.prix.toFixed(2)}€</p>
+                  </div>
+                  <div className="produit-actions">
+                    {isAvailable ? (
+                      getQuantiteDansPanier(produit.id) > 0 ? (
+                        <div className="quantite-controls">
+                          <button 
+                            className="btn-quantite"
+                            onClick={() => retirerDuPanier(produit.id)}
+                          >
+                            -
+                          </button>
+                          <span className="quantite">{getQuantiteDansPanier(produit.id)}</span>
+                          <button 
+                            className="btn-quantite"
+                            onClick={() => ajouterAuPanier(produit)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          className="btn btn-primary"
+                          onClick={() => ajouterAuPanier(produit)}
+                        >
+                          Ajouter
+                        </button>
+                      )
+                    ) : (
+                      <button className="btn btn-secondary" disabled>Indisponible</button>
+                    )}
+                  </div>
                 </div>
-                <div className="produit-actions">
-                  {getQuantiteDansPanier(produit.id) > 0 ? (
-                    <div className="quantite-controls">
-                      <button 
-                        className="btn-quantite"
-                        onClick={() => retirerDuPanier(produit.id)}
-                      >
-                        -
-                      </button>
-                      <span className="quantite">{getQuantiteDansPanier(produit.id)}</span>
-                      <button 
-                        className="btn-quantite"
-                        onClick={() => ajouterAuPanier(produit)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  ) : (
-                    <button 
-                      className="btn btn-primary"
-                      onClick={() => ajouterAuPanier(produit)}
-                    >
-                      Ajouter
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
