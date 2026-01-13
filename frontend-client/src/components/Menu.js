@@ -19,6 +19,8 @@ const normalizeProduit = (p) => ({
 function Menu() {
   const [produits, setProduits] = useState([]);
   const [panier, setPanier] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('Toutes');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -110,6 +112,21 @@ function Menu() {
 
   const tableNumber = localStorage.getItem('tableNumber');
 
+  // derive categories from produits (normalize empty -> 'Autres')
+  const categoriesSet = new Set();
+  produits.forEach(p => {
+    const cat = p.categorie && p.categorie.toString().trim() ? p.categorie.toString().trim() : 'Autres';
+    categoriesSet.add(cat);
+  });
+  const categories = ['Toutes', ...Array.from(categoriesSet).sort()];
+
+  const filteredProduits = selectedCategory && selectedCategory !== 'Toutes'
+    ? produits.filter(p => {
+        const cat = p.categorie && p.categorie.toString().trim() ? p.categorie.toString().trim() : 'Autres';
+        return cat === selectedCategory;
+      })
+    : produits;
+
   return (
     <div className="menu-container">
       <div className="menu-header">
@@ -119,50 +136,74 @@ function Menu() {
             <p className="table-info">Table: {tableNumber}</p>
           )}
         </div>
-        <button 
-          className="btn btn-primary panier-btn"
-          onClick={() => navigate('/panier')}
-        >
-          Panier ({panier.length}) - {getTotalPanier().toFixed(2)}€
-        </button>
+        <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+          <button 
+            className="btn btn-outline-light"
+            onClick={() => setSidebarOpen(s => !s)}
+            title="Afficher/Masquer catégories"
+          >
+            Catégories
+          </button>
+          <button 
+            className="btn btn-primary panier-btn"
+            onClick={() => navigate('/panier')}
+          >
+            Panier ({panier.length}) - {getTotalPanier().toFixed(2)}€
+          </button>
+        </div>
       </div>
 
-      <div className="produits-grid">
-        {produits.map(produit => (
-          <div key={produit.id} className="produit-card">
-            <div className="produit-info">
-              <h3>{produit.nom}</h3>
-              <p className="produit-description">{produit.description}</p>
-              <p className="produit-prix">{produit.prix.toFixed(2)}€</p>
-            </div>
-            <div className="produit-actions">
-              {getQuantiteDansPanier(produit.id) > 0 ? (
-                <div className="quantite-controls">
-                  <button 
-                    className="btn-quantite"
-                    onClick={() => retirerDuPanier(produit.id)}
-                  >
-                    -
-                  </button>
-                  <span className="quantite">{getQuantiteDansPanier(produit.id)}</span>
-                  <button 
-                    className="btn-quantite"
-                    onClick={() => ajouterAuPanier(produit)}
-                  >
-                    +
-                  </button>
+      <div className="menu-layout">
+        <div className="menu-main">
+          <div className="produits-grid">
+            {filteredProduits.map(produit => (
+              <div key={produit.id} className="produit-card">
+                <div className="produit-info">
+                  <h3>{produit.nom}</h3>
+                  <p className="produit-description">{produit.description}</p>
+                  <p className="produit-prix">{produit.prix.toFixed(2)}€</p>
                 </div>
-              ) : (
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => ajouterAuPanier(produit)}
-                >
-                  Ajouter
-                </button>
-              )}
-            </div>
+                <div className="produit-actions">
+                  {getQuantiteDansPanier(produit.id) > 0 ? (
+                    <div className="quantite-controls">
+                      <button 
+                        className="btn-quantite"
+                        onClick={() => retirerDuPanier(produit.id)}
+                      >
+                        -
+                      </button>
+                      <span className="quantite">{getQuantiteDansPanier(produit.id)}</span>
+                      <button 
+                        className="btn-quantite"
+                        onClick={() => ajouterAuPanier(produit)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => ajouterAuPanier(produit)}
+                    >
+                      Ajouter
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <aside className={`category-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+          <h4>Catégories</h4>
+          <ul className="category-list">
+            {categories.map(cat => (
+              <li key={cat} className={cat === selectedCategory ? 'active' : ''}>
+                <button className="category-btn" onClick={() => setSelectedCategory(cat)}>{cat}</button>
+              </li>
+            ))}
+          </ul>
+        </aside>
       </div>
     </div>
   );

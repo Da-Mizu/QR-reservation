@@ -5,6 +5,7 @@ import Stats from './components/Stats';
 import Login from './components/Login';
 import QRGenerator from './components/QRGenerator';
 import TableMap from './components/TableMap';
+import MenuManager from './components/MenuManager';
 import { AuthContext } from './context/AuthContext';
 import './App.css';
 
@@ -48,6 +49,13 @@ function Navigation() {
             onClick={() => setMenuOpen(false)}
           >
             🗺️ Plan du restaurant
+          </Link>
+          <Link 
+            to="/menu" 
+            className={location.pathname === '/menu' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setMenuOpen(false)}
+          >
+            🍽️ Gestion Menu
           </Link>
           
           <div className="nav-user">
@@ -117,6 +125,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TableMap />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/menu" 
+            element={
+              <ProtectedRoute>
+                <MenuManager />
               </ProtectedRoute>
             } 
           />

@@ -23,10 +23,12 @@ if (isset($parts[2]) && $parts[2] === 'reset' && $method === 'POST') {
             nom VARCHAR(255) NOT NULL,
             description TEXT,
             prix DECIMAL(10,2) NOT NULL,
+            categorie VARCHAR(100) DEFAULT NULL,
             disponible TINYINT(1) DEFAULT 1,
             image TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+            FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
+            INDEX idx_categorie (categorie)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
         $pdo->exec("CREATE TABLE commandes (
