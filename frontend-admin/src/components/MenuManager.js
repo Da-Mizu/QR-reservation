@@ -26,6 +26,8 @@ function MenuManager() {
     categorie: '',
     disponible: true
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     chargerProduits();
@@ -54,6 +56,7 @@ function MenuManager() {
         categorie: produit.categorie || '',
         disponible: produit.disponible === 1 || produit.disponible === true
       });
+      setImagePreview(produit.image || null);
     } else {
       setEditingProduit(null);
       setFormData({
@@ -63,6 +66,8 @@ function MenuManager() {
         categorie: '',
         disponible: true
       });
+      setImagePreview(null);
+      setImageFile(null);
     }
     setShowModal(true);
     setError('');
@@ -82,6 +87,19 @@ function MenuManager() {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      setImageFile(null);
+      setImagePreview(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -98,18 +116,35 @@ function MenuManager() {
 
     try {
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      const payload = {
-        ...formData,
-        prix: parseFloat(formData.prix),
-        disponible: formData.disponible ? 1 : 0
-      };
 
-      if (editingProduit) {
-        // Update
-        await axios.put(`${API_URL}/produits/${editingProduit.id}`, payload, config);
+      // If an image is selected, use FormData (multipart). Otherwise send JSON.
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('nom', formData.nom);
+        fd.append('description', formData.description || '');
+        fd.append('prix', parseFloat(formData.prix));
+        fd.append('categorie', formData.categorie || '');
+        fd.append('disponible', formData.disponible ? 1 : 0);
+        fd.append('image', imageFile);
+
+        if (editingProduit) {
+          // Use POST for multipart updates so PHP receives $_FILES
+          await axios.post(`${API_URL}/produits/${editingProduit.id}`, fd, config);
+        } else {
+          await axios.post(`${API_URL}/produits`, fd, config);
+        }
       } else {
-        // Create
-        await axios.post(`${API_URL}/produits`, payload, config);
+        const payload = {
+          ...formData,
+          prix: parseFloat(formData.prix),
+          disponible: formData.disponible ? 1 : 0
+        };
+
+        if (editingProduit) {
+          await axios.put(`${API_URL}/produits/${editingProduit.id}`, payload, config);
+        } else {
+          await axios.post(`${API_URL}/produits`, payload, config);
+        }
       }
 
       handleCloseModal();
@@ -314,6 +349,20 @@ function MenuManager() {
               <Form.Text className="text-muted">
                 Tapez une nouvelle catégorie ou choisissez parmi les existantes
               </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Photo du produit</Form.Label>
+              <Form.Control
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {imagePreview && (
+                <div className="mt-2">
+                  <img src={imagePreview} alt="Aperçu" style={{maxWidth: '160px', borderRadius: 8}} />
+                </div>
+              )}
             </Form.Group>
 
             <Form.Group className="mb-3">

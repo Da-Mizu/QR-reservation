@@ -9,6 +9,7 @@ const API_BASE = RAW_API_URL
   .replace(/\/index\.php\/?$/, '')
   .replace(/\/api\/?$/, '');
 const API_URL = `${API_BASE}/api`;
+const SITE_ROOT = API_BASE.replace(/\/backend-php\/?$/, '');
 
 // Force les champs numériques à être des nombres pour éviter les .toFixed sur des strings
 const normalizeProduit = (p) => ({
@@ -173,6 +174,11 @@ function Menu() {
               const isAvailable = produit.disponible === 1 || produit.disponible === true || produit.disponible === '1';
               return (
                 <div key={produit.id} className={`produit-card ${!isAvailable ? 'unavailable' : ''}`}>
+                  {produit.image && (
+                    <div className="produit-image">
+                      <img src={`${SITE_ROOT}/${produit.image}`} alt={produit.nom} />
+                    </div>
+                  )}
                   <div className="produit-info">
                     <h3 className={!isAvailable ? 'titre-indisponible' : ''}>{produit.nom}</h3>
                     <p className="produit-description">{produit.description}</p>

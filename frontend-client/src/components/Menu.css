@@ -134,6 +134,21 @@
   color: #999;
 }
 
+.produit-image {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.produit-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .produit-info h3 {
   color: #333;
   margin-bottom: 8px;

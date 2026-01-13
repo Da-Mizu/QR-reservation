@@ -1,0 +1,17 @@
+# Ignore backend uploads (product images)
+/backend-php/uploads/
+
+# Node/front-end defaults
+/node_modules/
+/frontend-admin/build/
+/frontend-client/build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
