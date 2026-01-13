@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav, Toast, ToastContainer } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.css';
 import { AuthContext } from '../context/AuthContext';
@@ -36,6 +36,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('toutes');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+  const [seenCommandeIds, setSeenCommandeIds] = useState(new Set());
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -53,7 +55,34 @@ function Dashboard() {
     try {
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
       const response = await axios.get(`${API_URL}/commandes`, config);
-      setCommandes(response.data.map(normalizeCommande));
+      const loaded = response.data.map(normalizeCommande);
+
+      // detect new commandes and create notifications
+      const loadedIds = new Set(loaded.map(c => c.id));
+      // if this is the first load, just mark seen ids without notifying
+      if (seenCommandeIds.size === 0) {
+        setSeenCommandeIds(loadedIds);
+      } else {
+        const newOrders = loaded.filter(c => !seenCommandeIds.has(c.id));
+        if (newOrders.length > 0) {
+          const toNotify = newOrders.map(c => ({
+            id: c.id,
+            table_number: c.table_number,
+            items: c.items,
+            created_at: c.created_at
+          }));
+          // prepend notifications
+          setNotifications(prev => [...toNotify, ...prev].slice(0, 8));
+        }
+        setSeenCommandeIds(prev => {
+          // merge previous seen ids with loaded ids
+          const merged = new Set(prev);
+          for (const id of loadedIds) merged.add(id);
+          return merged;
+        });
+      }
+
+      setCommandes(loaded);
       setLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des commandes:', error);
@@ -148,6 +177,31 @@ function Dashboard() {
 
   return (
     <>
+      {/* Toasts notifications container */}
+      <ToastContainer position="top-end" className="p-3">
+        {notifications.map((n) => (
+          <Toast key={n.id} onClose={() => setNotifications(prev => prev.filter(x => x.id !== n.id))} autohide delay={8000}>
+            <Toast.Header>
+              <strong className="me-auto">Nouvelle commande</strong>
+              <small>{new Date(n.created_at).toLocaleTimeString()}</small>
+            </Toast.Header>
+            <Toast.Body>
+              <div>Table: <strong>{n.table_number || '—'}</strong></div>
+              <div className="mt-2 small">
+                {n.items && n.items.length > 0 ? (
+                  <ul className="mb-0">
+                    {n.items.map((it, idx) => (
+                      <li key={idx}>{it.quantite}× {it.nom}</li>
+                    ))}
+                  </ul>
+                ) : (<div className="text-muted">(aucun article)</div>)}
+              </div>
+            </Toast.Body>
+          </Toast>
+        ))}
+      </ToastContainer>
+
+      
       <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
         <Container fluid>
           <Navbar.Brand className="fw-bold">Tableau de bord</Navbar.Brand>
