@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import './Menu.css';
@@ -22,7 +22,10 @@ function Menu() {
   const [panier, setPanier] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('Toutes');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [animating, setAnimating] = useState(false);
+  const [origin, setOrigin] = useState({ x: '50%', y: '20%' });
   const [loading, setLoading] = useState(true);
+  const menuMainRef = useRef(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -141,6 +144,26 @@ function Menu() {
       })
     : produits;
 
+  const handleCategoryClick = (cat, e) => {
+    // capture click origin relative to menuMain
+    if (menuMainRef.current && e && e.clientX != null) {
+      const rect = menuMainRef.current.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      setOrigin({ x: `${x}%`, y: `${y}%` });
+    } else {
+      setOrigin({ x: '50%', y: '20%' });
+    }
+
+    setAnimating(true);
+    // wait for the shrink animation, then change category and un-animate
+    window.setTimeout(() => {
+      setSelectedCategory(cat);
+      // small delay to let the content refresh, then bring back
+      window.setTimeout(() => setAnimating(false), 60);
+    }, 260);
+  };
+
   return (
     <div className="menu-container">
       <div className="menu-header">
@@ -168,7 +191,11 @@ function Menu() {
       </div>
 
       <div className="menu-layout">
-        <div className="menu-main">
+        <div
+          className={`menu-main ${animating ? 'animating' : ''}`}
+          ref={menuMainRef}
+          style={{ '--origin-x': origin.x, '--origin-y': origin.y }}
+        >
           <div className="produits-grid">
             {filteredProduits.map(produit => {
               const isAvailable = produit.disponible === 1 || produit.disponible === true || produit.disponible === '1';
@@ -225,7 +252,7 @@ function Menu() {
           <ul className="category-list">
             {categories.map(cat => (
               <li key={cat} className={cat === selectedCategory ? 'active' : ''}>
-                <button className="category-btn" onClick={() => setSelectedCategory(cat)}>{cat}</button>
+                <button className="category-btn" onClick={(e) => handleCategoryClick(cat, e)}>{cat}</button>
               </li>
             ))}
           </ul>
