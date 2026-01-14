@@ -9,10 +9,13 @@ import MenuManager from './components/MenuManager';
 import { AuthContext } from './context/AuthContext';
 import './App.css';
 
+import RestaurantSettingsModal from './components/RestaurantSettingsModal';
+
 function Navigation() {
   const location = useLocation();
   const { logout, user } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showRestModal, setShowRestModal] = useState(false);
   
   return (
     <nav className="admin-nav">
@@ -59,7 +62,7 @@ function Navigation() {
           </Link>
           
           <div className="nav-user">
-            <span className="user-email">{user?.email}</span>
+            <a href="#" className="user-email" onClick={(e) => { e.preventDefault(); setShowRestModal(true); }}>{user?.email}</a>
             <button className="btn-logout" onClick={() => {
               logout();
               setMenuOpen(false);
@@ -67,6 +70,7 @@ function Navigation() {
               🚪 Déconnexion
             </button>
           </div>
+          <RestaurantSettingsModal show={showRestModal} onHide={() => setShowRestModal(false)} />
         </div>
       </div>
     </nav>

@@ -61,6 +61,8 @@ if ($method === 'GET' && !isset($parts[2])) {
     $stmt->execute([$restaurantId]);
     $rows = $stmt->fetchAll();
     $out = [];
+    // prepare restaurant lookup
+    $restStmt = $pdo->prepare('SELECT id, nom, email, telephone, adresse FROM restaurants WHERE id = ? LIMIT 1');
     foreach ($rows as $row) {
         $itemsStmt = $pdo->prepare('SELECT ci.produit_id as id, p.nom, ci.prix, ci.quantite FROM commande_items ci JOIN produits p ON ci.produit_id = p.id WHERE ci.commande_id = ?');
         $itemsStmt->execute([$row['id']]);
@@ -69,6 +71,20 @@ if ($method === 'GET' && !isset($parts[2])) {
         $row['email'] = $row['email'] ? decrypt_value($row['email']) : null;
         $row['telephone'] = $row['telephone'] ? decrypt_value($row['telephone']) : null;
         $row['table_number'] = $row['table_number'] ?: null;
+        // attach restaurant info
+        $restStmt->execute([(int)$row['restaurant_id']]);
+        $r = $restStmt->fetch();
+        if ($r) {
+            $row['restaurant'] = [
+                'id' => (int)$r['id'],
+                'nom' => $r['nom'],
+                'email' => $r['email'],
+                'telephone' => $r['telephone'],
+                'adresse' => $r['adresse']
+            ];
+        } else {
+            $row['restaurant'] = null;
+        }
         $out[] = $row;
     }
     respond($out);
@@ -85,6 +101,21 @@ if ($method === 'GET' && isset($parts[2])) {
     $row['nom'] = $row['nom'] ? decrypt_value($row['nom']) : null;
     $row['email'] = $row['email'] ? decrypt_value($row['email']) : null;
     $row['telephone'] = $row['telephone'] ? decrypt_value($row['telephone']) : null;
+    // attach restaurant info for this commande
+    $restStmt = $pdo->prepare('SELECT id, nom, email, telephone, adresse FROM restaurants WHERE id = ? LIMIT 1');
+    $restStmt->execute([(int)$row['restaurant_id']]);
+    $r = $restStmt->fetch();
+    if ($r) {
+        $row['restaurant'] = [
+            'id' => (int)$r['id'],
+            'nom' => $r['nom'],
+            'email' => $r['email'],
+            'telephone' => $r['telephone'],
+            'adresse' => $r['adresse']
+        ];
+    } else {
+        $row['restaurant'] = null;
+    }
     respond($row);
 }
 
