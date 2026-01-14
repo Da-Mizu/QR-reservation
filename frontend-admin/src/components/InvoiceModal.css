@@ -1,0 +1,128 @@
+@charset "UTF-8";
+
+/* Invoice Modal Styles */
+
+.invoice-container {
+  padding: 20px;
+  background: white;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #333;
+}
+
+.restaurant-info h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.restaurant-info p {
+  margin: 3px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.invoice-meta {
+  text-align: right;
+}
+
+.invoice-meta h3 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  color: #333;
+}
+
+.invoice-meta p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.client-info {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.client-info h4 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.client-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.invoice-items {
+  margin-bottom: 30px;
+}
+
+.invoice-items h4 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
+}
+
+.items-table thead {
+  background-color: #e9ecef;
+}
+
+.items-table th {
+  padding: 12px 10px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  border: 1px solid #dee2e6;
+}
+
+.items-table td {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #dee2e6;
+}
+
+.total-row {
+  background-color: #f8f9fa;
+  font-size: 16px;
+}
+
+.total-row td {
+  padding: 15px 10px;
+}
+
+.invoice-footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.invoice-footer p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.invoice-footer .small {
+  font-size: 12px;
+}
+
+/* Print-friendly styles */
+@media print {
+  .invoice-container {
+    padding: 0;
+  }
+}
