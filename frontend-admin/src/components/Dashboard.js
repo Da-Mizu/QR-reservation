@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Button, Badge, Spinner, Navbar, Nav, Toast, 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Dashboard.css';
 import { AuthContext } from '../context/AuthContext';
+import InvoiceModal from './InvoiceModal';
 
 // Normalise l'URL API pour éviter /index.php/api ou /api/api
 const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
@@ -38,6 +39,8 @@ function Dashboard() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [seenCommandeIds, setSeenCommandeIds] = useState(new Set());
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedCommande, setSelectedCommande] = useState(null);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -101,6 +104,16 @@ function Dashboard() {
       console.error('Erreur lors de la mise à jour:', error);
       alert('Erreur lors de la mise à jour du statut');
     }
+  };
+
+  const handleOpenInvoice = (commande) => {
+    setSelectedCommande(commande);
+    setShowInvoiceModal(true);
+  };
+
+  const handleCloseInvoice = () => {
+    setShowInvoiceModal(false);
+    setSelectedCommande(null);
   };
 
   const commandesFiltrees = filter === 'toutes' 
@@ -332,6 +345,14 @@ function Dashboard() {
                 </Card.Body>
                 <Card.Footer className="bg-transparent">
                   <div className="d-flex gap-2 flex-wrap">
+                    <Button 
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => handleOpenInvoice(commande)}
+                      title="Imprimer facture"
+                    >
+                      🖨️ Facture
+                    </Button>
                     {commande.statut === 'en_attente' && (
                       <>
                         <Button 
@@ -462,6 +483,12 @@ function Dashboard() {
         )}
       </Row>
     </Container>
+    
+    <InvoiceModal 
+      show={showInvoiceModal}
+      commande={selectedCommande}
+      onClose={handleCloseInvoice}
+    />
     </>
   );
 }
