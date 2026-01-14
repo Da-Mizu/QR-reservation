@@ -7,6 +7,10 @@ function InvoiceModal({ show, commande, onClose }) {
   const invoiceRef = useRef();
 
   const generatePDF = () => {
+    if (!commande || !commande.id) {
+      console.error('Invalid commande data');
+      return;
+    }
     const element = invoiceRef.current;
     if (!element) {
       console.error('Invoice element not found');
@@ -37,7 +41,7 @@ function InvoiceModal({ show, commande, onClose }) {
   return (
     <Modal show={show} onHide={onClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Facture - Commande #{commande.id.substring(0, 8)}</Modal.Title>
+        <Modal.Title>Facture - Commande #{commande?.id?.substring(0, 8) || 'N/A'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div ref={invoiceRef} className="invoice-container">
@@ -51,7 +55,7 @@ function InvoiceModal({ show, commande, onClose }) {
             </div>
             <div className="invoice-meta">
               <h3>FACTURE</h3>
-              <p><strong>N° Facture:</strong> {commande.id.substring(0, 8).toUpperCase()}</p>
+              <p><strong>N° Facture:</strong> {commande?.id?.substring(0, 8).toUpperCase() || 'N/A'}</p>
               <p><strong>Date:</strong> {formatDate(commande.created_at)}</p>
               {commande.table_number && (
                 <p><strong>Table:</strong> {commande.table_number}</p>
