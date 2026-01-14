@@ -24,8 +24,19 @@ function InvoiceModal({ show, commande, onClose }) {
       margin: 10,
       filename: `facture-${getInvoiceNumber()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true,
+        letterRendering: true,
+        logging: false
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait',
+        compress: true,
+        putOnlyUsedFonts: true
+      }
     };
     html2pdf().set(opt).from(element).save();
   };
@@ -48,7 +59,8 @@ function InvoiceModal({ show, commande, onClose }) {
         <Modal.Title>Facture - Commande #{getInvoiceNumber()}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div ref={invoiceRef} className="invoice-container">
+        <div ref={invoiceRef} className="invoice-container" style={{ fontFamily: 'Arial, sans-serif' }}>
+          <meta charSet="UTF-8" />
           <div className="invoice-header">
             <div className="restaurant-info">
               <h2>Restaurant QR Réservation</h2>
