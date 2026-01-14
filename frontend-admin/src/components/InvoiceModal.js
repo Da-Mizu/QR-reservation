@@ -8,6 +8,10 @@ function InvoiceModal({ show, commande, onClose }) {
 
   const generatePDF = () => {
     const element = invoiceRef.current;
+    if (!element) {
+      console.error('Invoice element not found');
+      return;
+    }
     const opt = {
       margin: 10,
       filename: `facture-${commande.id.substring(0, 8)}.pdf`,
@@ -75,7 +79,7 @@ function InvoiceModal({ show, commande, onClose }) {
               </thead>
               <tbody>
                 {commande.items && commande.items.map((item, index) => (
-                  <tr key={index}>
+                  <tr key={item.id || `item-${item.nom}-${index}`}>
                     <td>{item.nom}</td>
                     <td className="text-center">{item.quantite}</td>
                     <td className="text-end">{(item.prix || 0).toFixed(2)}€</td>
