@@ -6,6 +6,10 @@ import './InvoiceModal.css';
 function InvoiceModal({ show, commande, onClose }) {
   const invoiceRef = useRef();
 
+  const getInvoiceNumber = () => {
+    return commande?.id?.substring(0, 8) || 'N/A';
+  };
+
   const generatePDF = () => {
     if (!commande || !commande.id) {
       console.error('Invalid commande data');
@@ -18,7 +22,7 @@ function InvoiceModal({ show, commande, onClose }) {
     }
     const opt = {
       margin: 10,
-      filename: `facture-${commande.id.substring(0, 8)}.pdf`,
+      filename: `facture-${getInvoiceNumber()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -41,7 +45,7 @@ function InvoiceModal({ show, commande, onClose }) {
   return (
     <Modal show={show} onHide={onClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Facture - Commande #{commande?.id?.substring(0, 8) || 'N/A'}</Modal.Title>
+        <Modal.Title>Facture - Commande #{getInvoiceNumber()}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div ref={invoiceRef} className="invoice-container">
@@ -55,7 +59,7 @@ function InvoiceModal({ show, commande, onClose }) {
             </div>
             <div className="invoice-meta">
               <h3>FACTURE</h3>
-              <p><strong>N° Facture:</strong> {commande?.id?.substring(0, 8).toUpperCase() || 'N/A'}</p>
+              <p><strong>N° Facture:</strong> {getInvoiceNumber().toUpperCase()}</p>
               <p><strong>Date:</strong> {formatDate(commande.created_at)}</p>
               {commande.table_number && (
                 <p><strong>Table:</strong> {commande.table_number}</p>
