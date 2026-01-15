@@ -42,26 +42,27 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
         $temps_moyen = $result['total_servies'] > 10 ? 30 : ($result['total_servies'] > 0 ? 25 : 0);
         $stats['temps_moyen_service_minutes'] = $temps_moyen;
 
-        // 2. Produits les plus vendus (top 10 des 30 derniers jours)
-        $stmt = $pdo->prepare("
-            SELECT 
-                p.id,
-                p.nom,
-                p.prix,
-                p.image,
-                SUM(ci.quantite) as total_vendu,
-                COUNT(DISTINCT ci.commande_id) as nombre_commandes,
-                SUM(ci.quantite * ci.prix) as revenu_total
-            FROM commande_items ci
-            JOIN produits p ON ci.produit_id = p.id
-            JOIN commandes c ON ci.commande_id = c.id
-            WHERE c.restaurant_id = ?
-              AND c.statut IN ('servie', 'terminee')
-              AND c.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-            GROUP BY p.id, p.nom, p.prix, p.image
-            ORDER BY total_vendu DESC
-            LIMIT 10
-        ");
+                // 2. Produits les plus vendus (top 10 des 30 derniers jours)
+                // Inclure toutes les commandes non annulées afin que les nouvelles commandes apparaissent immédiatement
+                $stmt = $pdo->prepare("
+                        SELECT 
+                                p.id,
+                                p.nom,
+                                p.prix,
+                                p.image,
+                                SUM(ci.quantite) as total_vendu,
+                                COUNT(DISTINCT ci.commande_id) as nombre_commandes,
+                                SUM(ci.quantite * ci.prix) as revenu_total
+                        FROM commande_items ci
+                        JOIN produits p ON ci.produit_id = p.id
+                        JOIN commandes c ON ci.commande_id = c.id
+                        WHERE c.restaurant_id = ?
+                            AND c.statut != 'annulee'
+                            AND c.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                        GROUP BY p.id, p.nom, p.prix, p.image
+                        ORDER BY total_vendu DESC
+                        LIMIT 10
+                ");
         $stmt->execute([$restaurantId]);
         $stats['produits_populaires'] = $stmt->fetchAll();
 
