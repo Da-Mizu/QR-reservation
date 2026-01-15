@@ -27,14 +27,35 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
     try {
         $stats = [];
 
+            // Range support via ?range=7d|30d|6m|1y (default 7d)
+            $range = isset($_GET['range']) ? $_GET['range'] : '7d';
+            switch ($range) {
+                case '1d':
+                case 'today':
+                    $interval_sql = '1 DAY';
+                    break;
+                case '30d':
+                case '1m':
+                    $interval_sql = '30 DAY';
+                    break;
+                case '6m':
+                    $interval_sql = '6 MONTH';
+                    break;
+                case '1y':
+                    $interval_sql = '1 YEAR';
+                    break;
+                case '7d':
+                default:
+                    $interval_sql = '7 DAY';
+            }
         // 1. Temps moyen de service (en minutes, des 7 derniers jours)
         // FIXME: Utilise 30 min par défaut si updated_at n'existe pas
         $stmt = $pdo->prepare("
-            SELECT COUNT(*) as total_servies
-            FROM commandes 
-            WHERE restaurant_id = ? 
-              AND statut IN ('servie', 'terminee')
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                SELECT COUNT(*) as total_servies
+                FROM commandes 
+                WHERE restaurant_id = ? 
+                  AND statut IN ('servie', 'terminee')
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL $interval_sql)
         ");
         $stmt->execute([$restaurantId]);
         $result = $stmt->fetch();
@@ -57,8 +78,8 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
                         JOIN produits p ON ci.produit_id = p.id
                         JOIN commandes c ON ci.commande_id = c.id
                         WHERE c.restaurant_id = ?
-                            AND c.statut != 'annulee'
-                            AND c.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                                AND c.statut != 'annulee'
+                                AND c.created_at >= DATE_SUB(NOW(), INTERVAL $interval_sql)
                         GROUP BY p.id, p.nom, p.prix, p.image
                         ORDER BY total_vendu DESC
                         LIMIT 10
@@ -74,7 +95,7 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
                 SUM(total) as revenu_total
             FROM commandes
             WHERE restaurant_id = ?
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL $interval_sql)
             GROUP BY HOUR(created_at)
             ORDER BY heure
         ");
@@ -110,7 +131,7 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
                 AVG(CASE WHEN statut = 'terminee' THEN total ELSE NULL END) as panier_moyen
             FROM commandes
             WHERE restaurant_id = ?
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL $interval_sql)
         ");
         $stmt->execute([$restaurantId]);
         $stats['generales'] = $stmt->fetch();
@@ -123,7 +144,7 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
                 SUM(total) as revenu
             FROM commandes
             WHERE restaurant_id = ?
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                  AND created_at >= DATE_SUB(NOW(), INTERVAL $interval_sql)
             GROUP BY DATE(created_at)
             ORDER BY date
         ");

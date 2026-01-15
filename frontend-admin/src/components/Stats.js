@@ -16,17 +16,36 @@ const API_URL = `${API_BASE}/api`;
 function Stats() {
   const [advancedStats, setAdvancedStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [range, setRange] = useState('7d');
   const { token } = useContext(AuthContext);
 
-  useEffect(() => {
-    chargerStatsAvancees();
-  }, [token]);
+  const rangeLabelLong = (r) => {
+    if (r === '1d') return "Aujourd'hui";
+    if (r === '7d') return '7 derniers jours';
+    if (r === '30d') return '30 derniers jours';
+    if (r === '6m') return '6 derniers mois';
+    if (r === '1y') return '1 an';
+    return r;
+  };
 
-  const chargerStatsAvancees = async () => {
+  const rangeLabelShort = (r) => {
+    if (r === '1d') return "Aujourd'hui";
+    if (r === '7d') return '7j';
+    if (r === '30d') return '30j';
+    if (r === '6m') return '6m';
+    if (r === '1y') return '1an';
+    return r;
+  };
+
+  useEffect(() => {
+    chargerStatsAvancees(range);
+  }, [token, range]);
+  const chargerStatsAvancees = async (rangeParam = '7d') => {
     try {
       setLoading(true);
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      const res = await axios.get(`${API_URL}/stats/advanced`, config);
+      const url = `${API_URL}/stats/advanced` + (rangeParam ? `?range=${encodeURIComponent(rangeParam)}` : '');
+      const res = await axios.get(url, config);
       setAdvancedStats(res.data || {});
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques avancées:', error, error.response?.data || '');
@@ -180,6 +199,17 @@ function Stats() {
             <h2 className="mb-0">Statistiques avancées</h2>
           </Col>
         </Row>
+          <Row className="mb-3">
+            <Col>
+              <div className="d-flex gap-2">
+                <Button size="sm" variant={range==='1d'?'primary':'outline-secondary'} onClick={()=>setRange('1d')}>Aujourd'hui</Button>
+                <Button size="sm" variant={range==='7d'?'primary':'outline-secondary'} onClick={()=>setRange('7d')}>7 jours</Button>
+                <Button size="sm" variant={range==='30d'?'primary':'outline-secondary'} onClick={()=>setRange('30d')}>1 mois</Button>
+                <Button size="sm" variant={range==='6m'?'primary':'outline-secondary'} onClick={()=>setRange('6m')}>6 mois</Button>
+                <Button size="sm" variant={range==='1y'?'primary':'outline-secondary'} onClick={()=>setRange('1y')}>1 an</Button>
+              </div>
+            </Col>
+          </Row>
 
         {!advancedStats || advancedStats.error ? (
           <Card className="mb-4">
@@ -198,7 +228,7 @@ function Stats() {
                   <Card.Body>
                     <Card.Title className="text-muted small">⏱️ Temps moyen de service</Card.Title>
                     <h3 className="text-primary">{advancedStats.temps_moyen_service_minutes || 0} min</h3>
-                    <small className="text-muted">7 derniers jours</small>
+                    <small className="text-muted">{rangeLabelLong(range)}</small>
                   </Card.Body>
                 </Card>
               </Col>
@@ -207,7 +237,7 @@ function Stats() {
                   <Card.Body>
                     <Card.Title className="text-muted small">🍽️ Produits vendus</Card.Title>
                     <h3 className="text-success">{advancedStats.produits_populaires ? advancedStats.produits_populaires.reduce((s,p)=>s+parseInt(p.total_vendu||0),0) : 0}</h3>
-                    <small className="text-muted">30 derniers jours</small>
+                    <small className="text-muted">{rangeLabelLong(range)}</small>
                   </Card.Body>
                 </Card>
               </Col>
@@ -225,7 +255,7 @@ function Stats() {
             {advancedStats.produits_populaires && advancedStats.produits_populaires.length > 0 && (
               <Row className="mb-4">
                 <Col>
-                  <h6 className="mb-3">🏆 Top 5 Produits (30 derniers jours)</h6>
+                  <h6 className="mb-3">🏆 Top 5 Produits ({rangeLabelShort(range)})</h6>
                   <div className="table-responsive">
                     <table className="table table-sm table-hover">
                       <thead className="table-light"><tr><th>#</th><th>Produit</th><th className="text-center">Quantité</th><th className="text-center">Commandes</th><th className="text-end">Revenus</th></tr></thead>
@@ -243,7 +273,7 @@ function Stats() {
             {advancedStats.heures_pointe && advancedStats.heures_pointe.length > 0 && (
               <Row>
                 <Col>
-                  <h6 className="mb-3">🕐 Distribution des commandes par heure (7 derniers jours)</h6>
+                  <h6 className="mb-3">🕐 Distribution des commandes par heure ({rangeLabelShort(range)})</h6>
                   <div style={{display:'flex',alignItems:'flex-end',gap:'4px',height:'120px',overflowX:'auto',paddingBottom:10}}>
                     {advancedStats.heures_pointe.map(h=>{
                       const maxCommandes = Math.max(...advancedStats.heures_pointe.map(x=>x.nombre_commandes),1);
@@ -259,7 +289,7 @@ function Stats() {
             {advancedStats.evolution_7j && advancedStats.evolution_7j.length>0 && (
               <Row className="mt-4">
                 <Col>
-                  <h6 className="mb-3">📈 Évolution (7 derniers jours)</h6>
+                  <h6 className="mb-3">📈 Évolution ({rangeLabelShort(range)})</h6>
                   <div className="table-responsive">
                     <table className="table table-sm">
                       <thead><tr><th>Date</th><th>Commandes</th><th className="text-end">Revenus</th></tr></thead>
