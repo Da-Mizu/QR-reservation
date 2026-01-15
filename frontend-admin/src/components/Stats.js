@@ -278,7 +278,15 @@ function Stats() {
                     {advancedStats.heures_pointe.map(h=>{
                       const maxCommandes = Math.max(...advancedStats.heures_pointe.map(x=>x.nombre_commandes),1);
                       const height = (h.nombre_commandes / maxCommandes) * 100;
-                      return (<div key={h.heure} style={{flex:'0 0 30px',height:`${Math.max(height,2)}%`,backgroundColor:h.nombre_commandes>0?'#0d6efd':'#e9ecef',borderRadius:'3px 3px 0 0',position:'relative',minHeight:h.nombre_commandes>0?8:2}} title={`${h.heure}h: ${h.nombre_commandes} commandes`}>{h.nombre_commandes>0 && (<small style={{position:'absolute',top:'-18px',left:'50%',transform:'translateX(-50%)',fontSize:10,whiteSpace:'nowrap'}}>{h.nombre_commandes}</small>)}</div>);
+                      return (
+                        <div key={h.heure} style={{flex:'0 0 30px',display:'flex',alignItems:'flex-end',justifyContent:'center',height:'100%'}} title={`${h.heure}h: ${h.nombre_commandes} commandes`}>
+                          <div style={{width:'100%',height:`${Math.max(height,2)}%`,backgroundColor:h.nombre_commandes>0?'#0d6efd':'#e9ecef',borderRadius:'3px 3px 0 0',minHeight:h.nombre_commandes>0?8:2,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                            {h.nombre_commandes > 0 && (
+                              <span style={{fontSize:10,color: '#fff'}}>{h.nombre_commandes}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
                     })}
                   </div>
                   <div style={{display:'flex',gap:'4px',marginTop:5,overflowX:'auto'}}>{advancedStats.heures_pointe.map(h=>(<div key={h.heure} style={{flex:'0 0 30px',textAlign:'center',fontSize:10}}>{h.heure}h</div>))}</div>
