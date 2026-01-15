@@ -81,10 +81,18 @@ if ($method === 'GET' && isset($parts[2]) && $parts[2] === 'advanced') {
         $heuresData = $stmt->fetchAll();
         
         // remplir toutes les heures de 0 à 23 avec 0 si manquantes
-        $heuresMap = array_fill(0, 24, ['heure' => 0, 'nombre_commandes' => 0, 'revenu_total' => 0]);
+        $heuresMap = [];
+        for ($i = 0; $i < 24; $i++) {
+            $heuresMap[$i] = [
+                'heure' => $i,
+                'nombre_commandes' => 0,
+                'revenu_total' => 0
+            ];
+        }
         foreach ($heuresData as $h) {
-            $heuresMap[(int)$h['heure']] = [
-                'heure' => (int)$h['heure'],
+            $idx = (int)$h['heure'];
+            $heuresMap[$idx] = [
+                'heure' => $idx,
                 'nombre_commandes' => (int)$h['nombre_commandes'],
                 'revenu_total' => (float)$h['revenu_total']
             ];
