@@ -14,46 +14,24 @@ const API_BASE = RAW_API_URL
 const API_URL = `${API_BASE}/api`;
 
 function Stats() {
-  const [stats, setStats] = useState(null);
-  const [statsTables, setStatsTables] = useState([]);
-  const [statsJours, setStatsJours] = useState([]);
-  const [statsProduits, setStatsProduits] = useState([]);
+  const [advancedStats, setAdvancedStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [periode, setPeriode] = useState('tous');
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    chargerStats();
+    chargerStatsAvancees();
   }, [token]);
 
-  const chargerStats = async () => {
+  const chargerStatsAvancees = async () => {
     try {
       setLoading(true);
-      console.log('Chargement des statistiques depuis:', API_URL);
-      
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      const [statsRes, tablesRes, joursRes, produitsRes] = await Promise.all([
-        axios.get(`${API_URL}/stats`, config),
-        axios.get(`${API_URL}/stats/tables`, config),
-        axios.get(`${API_URL}/stats/jours`, config),
-        axios.get(`${API_URL}/stats/produits`, config)
-      ]);
-      
-      console.log('Réponses reçues:');
-      console.log('Stats générales:', statsRes.data);
-      console.log('Stats tables:', tablesRes.data);
-      console.log('Stats jours:', joursRes.data);
-      console.log('Stats produits:', produitsRes.data);
-      
-      setStats(statsRes.data);
-      setStatsTables(tablesRes.data);
-      setStatsJours(joursRes.data);
-      setStatsProduits(produitsRes.data);
-      setLoading(false);
+      const res = await axios.get(`${API_URL}/stats/advanced`, config);
+      setAdvancedStats(res.data || {});
     } catch (error) {
-      console.error('Erreur lors du chargement des statistiques:', error);
-      console.error('Détails de l\'erreur:', error.response?.data || error.message);
-      alert('Erreur lors du chargement des statistiques. Vérifiez la console pour plus de détails.');
+      console.error('Erreur lors du chargement des statistiques avancées:', error, error.response?.data || '');
+      setAdvancedStats({ error: 'Erreur lors du chargement des statistiques' });
+    } finally {
       setLoading(false);
     }
   };
@@ -61,32 +39,29 @@ function Stats() {
   const exportCSV = () => {
     const lines = [];
     const esc = (v) => ("\"" + String(v).replace(/\"/g, '""') + "\"");
+    // General (from advancedStats.generales)
+    const gen = advancedStats?.generales || {};
+    const revenus = parseFloat(gen.revenu_total || gen.revenus_totaux || 0) || 0;
+    const total = parseInt(gen.total_commandes || gen.total_commandes || 0) || 0;
+    const panier = parseFloat(gen.panier_moyen || gen.panier_moyen || 0) || 0;
 
-    // General
     lines.push(['Clé', 'Valeur']);
-    lines.push(['Revenus totaux', revenusTotaux.toFixed(2)]);
-    lines.push(['Total commandes', totalCommandes]);
-    lines.push(['Panier moyen', panierMoyen.toFixed(2)]);
+    lines.push(['Revenus totaux', revenus.toFixed(2)]);
+    lines.push(['Total commandes', total]);
+    lines.push(['Panier moyen', panier.toFixed(2)]);
     lines.push([]);
 
-    // Tables
-    if (statsTables && statsTables.length) {
-      lines.push(['Table', 'Commandes', 'Revenus']);
-      statsTables.forEach(s => lines.push([s.table_number, s.nombre_commandes, parseFloat(s.revenus || 0).toFixed(2)]));
+    // Top produits
+    if (advancedStats?.produits_populaires && advancedStats.produits_populaires.length) {
+      lines.push(['Produit', 'Quantité vendue', 'Commandes', 'Revenus']);
+      advancedStats.produits_populaires.forEach(p => lines.push([p.nom, p.total_vendu, p.nombre_commandes, parseFloat(p.revenu_total || 0).toFixed(2)]));
       lines.push([]);
     }
 
-    // Jours
-    if (statsJours && statsJours.length) {
+    // Evolution 7j
+    if (advancedStats?.evolution_7j && advancedStats.evolution_7j.length) {
       lines.push(['Date', 'Commandes', 'Revenus']);
-      statsJours.forEach(s => lines.push([new Date(s.date).toLocaleDateString('fr-FR'), s.nombre_commandes, parseFloat(s.revenus || 0).toFixed(2)]));
-      lines.push([]);
-    }
-
-    // Produits
-    if (statsProduits && statsProduits.length) {
-      lines.push(['Produit', 'Commandes', 'Quantité', 'Revenus']);
-      statsProduits.forEach(s => lines.push([s.nom, s.nombre_commandes, s.quantite_totale, parseFloat(s.revenus || 0).toFixed(2)]));
+      advancedStats.evolution_7j.forEach(d => lines.push([new Date(d.date).toLocaleDateString('fr-FR'), d.nombre_commandes, parseFloat(d.revenu || 0).toFixed(2)]));
       lines.push([]);
     }
 
@@ -115,7 +90,7 @@ function Stats() {
                 <Button 
                   variant="primary"
                   size="sm"
-                  onClick={chargerStats}
+                  onClick={chargerStatsAvancees}
                 >
                   Actualiser
                 </Button>
@@ -132,7 +107,7 @@ function Stats() {
     );
   }
 
-  if (!stats) {
+  if (!advancedStats) {
     return (
       <>
         <Navbar bg="light" expand="lg" sticky="top" className="border-bottom">
@@ -144,7 +119,7 @@ function Stats() {
                 <Button 
                   variant="primary"
                   size="sm"
-                  onClick={chargerStats}
+                  onClick={chargerStatsAvancees}
                 >
                   Actualiser
                 </Button>
@@ -157,7 +132,7 @@ function Stats() {
           <div className="text-center">
             <Button 
               variant="primary" 
-              onClick={chargerStats}
+              onClick={chargerStatsAvancees}
             >
               Réessayer
             </Button>
@@ -167,9 +142,10 @@ function Stats() {
     );
   }
 
-  const revenusTotaux = parseFloat(stats.revenus_totaux) || 0;
-  const panierMoyen = parseFloat(stats.panier_moyen) || 0;
-  const totalCommandes = parseInt(stats.total_commandes) || 0;
+  const generales = advancedStats.generales || {};
+  const revenusTotaux = parseFloat(generales.revenu_total || generales.revenus_totaux || 0) || 0;
+  const panierMoyen = parseFloat(generales.panier_moyen || generales.panier_moyen || 0) || 0;
+  const totalCommandes = parseInt(generales.total_commandes || generales.total_commandes || 0) || 0;
 
   return (
     <>
@@ -179,13 +155,13 @@ function Stats() {
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="gap-2">
-              <Button 
-                variant="primary"
-                size="sm"
-                onClick={chargerStats}
-              >
-                Actualiser
-              </Button>
+                <Button 
+                  variant="primary"
+                  size="sm"
+                  onClick={chargerStatsAvancees}
+                >
+                  Actualiser
+                </Button>
               <Button
                 variant="secondary"
                 size="sm"
@@ -201,157 +177,99 @@ function Stats() {
       <Container fluid className="py-4">
         <Row className="mb-4">
           <Col>
-            <h2 className="mb-0">Statistiques</h2>
+            <h2 className="mb-0">Statistiques avancées</h2>
           </Col>
         </Row>
 
-        <Row className="mb-4">
-          <Col lg={3} md={6} className="mb-3">
-            <Card className="text-center">
-              <Card.Body>
-                <Card.Title className="text-muted small">Revenus totaux</Card.Title>
-                <h2 className="text-success">{revenusTotaux.toFixed(2)}€</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={3} md={6} className="mb-3">
-            <Card className="text-center">
-              <Card.Body>
-                <Card.Title className="text-muted small">Total commandes</Card.Title>
-                <h2>{totalCommandes}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={3} md={6} className="mb-3">
-            <Card className="text-center">
-              <Card.Body>
-                <Card.Title className="text-muted small">Panier moyen</Card.Title>
-                <h2 className="text-info">{panierMoyen.toFixed(2)}€</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={3} md={6} className="mb-3">
-            <Card className="text-center">
-              <Card.Body>
-                <Card.Title className="text-muted small">En préparation</Card.Title>
-                <h2 className="text-warning">{stats?.en_preparation || 0}</h2>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+        {!advancedStats || advancedStats.error ? (
+          <Card className="mb-4">
+            <Card.Body>
+              <p className="text-center text-muted">{advancedStats?.error || 'Aucune statistique disponible.'}</p>
+              <div className="text-center">
+                <Button variant="primary" onClick={chargerStatsAvancees}>Réessayer</Button>
+              </div>
+            </Card.Body>
+          </Card>
+        ) : (
+          <>
+            <Row className="mb-4">
+              <Col md={4} className="mb-3">
+                <Card className="text-center border-primary">
+                  <Card.Body>
+                    <Card.Title className="text-muted small">⏱️ Temps moyen de service</Card.Title>
+                    <h3 className="text-primary">{advancedStats.temps_moyen_service_minutes || 0} min</h3>
+                    <small className="text-muted">7 derniers jours</small>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={4} className="mb-3">
+                <Card className="text-center border-success">
+                  <Card.Body>
+                    <Card.Title className="text-muted small">🍽️ Produits vendus</Card.Title>
+                    <h3 className="text-success">{advancedStats.produits_populaires ? advancedStats.produits_populaires.reduce((s,p)=>s+parseInt(p.total_vendu||0),0) : 0}</h3>
+                    <small className="text-muted">30 derniers jours</small>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={4} className="mb-3">
+                <Card className="text-center border-warning">
+                  <Card.Body>
+                    <Card.Title className="text-muted small">📈 Heure de pointe</Card.Title>
+                    <h3 className="text-warning">{(() => { const max = advancedStats.heures_pointe.reduce((prev,cur)=>cur.nombre_commandes>prev.nombre_commandes?cur:prev,{heure:0,nombre_commandes:0}); return max.nombre_commandes>0?`${max.heure}h - ${max.heure+1}h`:'—'; })()}</h3>
+                    <small className="text-muted">{advancedStats.heures_pointe ? advancedStats.heures_pointe.reduce((m,h)=>h.nombre_commandes>m?h.nombre_commandes:m,0):0} commandes</small>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
 
-        {/* Statistiques par table */}
-        {statsTables.length > 0 && (
-          <Row className="mb-4">
-            <Col>
-              <Card>
-                <Card.Header className="bg-white border-bottom">
-                  <Card.Title className="mb-0">🪑 Statistiques par table</Card.Title>
-                </Card.Header>
-                <Card.Body>
-                  <Table striped hover responsive>
-                    <thead>
-                      <tr>
-                        <th>Table</th>
-                        <th>Commandes</th>
-                        <th>Revenus</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {statsTables.map((stat, index) => (
-                        <tr key={index}>
-                          <td><strong>Table {stat.table_number}</strong></td>
-                          <td>{stat.nombre_commandes}</td>
-                          <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        )}
+            {advancedStats.produits_populaires && advancedStats.produits_populaires.length > 0 && (
+              <Row className="mb-4">
+                <Col>
+                  <h6 className="mb-3">🏆 Top 5 Produits (30 derniers jours)</h6>
+                  <div className="table-responsive">
+                    <table className="table table-sm table-hover">
+                      <thead className="table-light"><tr><th>#</th><th>Produit</th><th className="text-center">Quantité</th><th className="text-center">Commandes</th><th className="text-end">Revenus</th></tr></thead>
+                      <tbody>
+                        {advancedStats.produits_populaires.slice(0,5).map((p,idx)=> (
+                          <tr key={p.id}><td>{idx+1}</td><td><strong>{p.nom}</strong>{p.image && <span className="ms-2">🖼️</span>}</td><td className="text-center">{p.total_vendu}</td><td className="text-center">{p.nombre_commandes}</td><td className="text-end">{parseFloat(p.revenu_total||0).toFixed(2)}€</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Col>
+              </Row>
+            )}
 
-        {/* Statistiques par jour */}
-        {statsJours.length > 0 && (
-          <Row className="mb-4">
-            <Col>
-              <Card>
-                <Card.Header className="bg-white border-bottom">
-                  <Card.Title className="mb-0">📅 Évolution sur 30 jours</Card.Title>
-                </Card.Header>
-                <Card.Body>
-                  <Table striped hover responsive>
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Commandes</th>
-                        <th>Revenus</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {statsJours.map((stat, index) => (
-                        <tr key={index}>
-                          <td>{new Date(stat.date).toLocaleDateString('fr-FR')}</td>
-                          <td>{stat.nombre_commandes}</td>
-                          <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        )}
+            {advancedStats.heures_pointe && advancedStats.heures_pointe.length > 0 && (
+              <Row>
+                <Col>
+                  <h6 className="mb-3">🕐 Distribution des commandes par heure (7 derniers jours)</h6>
+                  <div style={{display:'flex',alignItems:'flex-end',gap:'4px',height:'120px',overflowX:'auto',paddingBottom:10}}>
+                    {advancedStats.heures_pointe.map(h=>{
+                      const maxCommandes = Math.max(...advancedStats.heures_pointe.map(x=>x.nombre_commandes),1);
+                      const height = (h.nombre_commandes / maxCommandes) * 100;
+                      return (<div key={h.heure} style={{flex:'0 0 30px',height:`${Math.max(height,2)}%`,backgroundColor:h.nombre_commandes>0?'#0d6efd':'#e9ecef',borderRadius:'3px 3px 0 0',position:'relative',minHeight:h.nombre_commandes>0?8:2}} title={`${h.heure}h: ${h.nombre_commandes} commandes`}>{h.nombre_commandes>0 && (<small style={{position:'absolute',top:'-18px',left:'50%',transform:'translateX(-50%)',fontSize:10,whiteSpace:'nowrap'}}>{h.nombre_commandes}</small>)}</div>);
+                    })}
+                  </div>
+                  <div style={{display:'flex',gap:'4px',marginTop:5,overflowX:'auto'}}>{advancedStats.heures_pointe.map(h=>(<div key={h.heure} style={{flex:'0 0 30px',textAlign:'center',fontSize:10}}>{h.heure}h</div>))}</div>
+                </Col>
+              </Row>
+            )}
 
-        {/* Produits les plus commandés */}
-        {statsProduits.length > 0 && (
-          <Row className="mb-4">
-            <Col>
-              <Card>
-                <Card.Header className="bg-white border-bottom">
-                  <Card.Title className="mb-0">🍕 Produits les plus commandés</Card.Title>
-                </Card.Header>
-                <Card.Body>
-                  <Table striped hover responsive>
-                    <thead>
-                      <tr>
-                        <th>Produit</th>
-                        <th>Commandes</th>
-                        <th>Quantité</th>
-                        <th>Revenus</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {statsProduits.map((stat, index) => (
-                        <tr key={index}>
-                          <td><strong>{stat.nom}</strong></td>
-                          <td>{stat.nombre_commandes}</td>
-                          <td>{stat.quantite_totale}</td>
-                          <td>{parseFloat(stat.revenus || 0).toFixed(2)}€</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        )}
-
-        {statsTables.length === 0 && statsJours.length === 0 && statsProduits.length === 0 && (
-          <Row>
-            <Col>
-              <Card className="text-center">
-                <Card.Body className="py-5">
-                  <p className="text-muted mb-2">Aucune statistique disponible pour le moment.</p>
-                  <p className="text-muted small">Les statistiques apparaîtront après la première commande.</p>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+            {advancedStats.evolution_7j && advancedStats.evolution_7j.length>0 && (
+              <Row className="mt-4">
+                <Col>
+                  <h6 className="mb-3">📈 Évolution (7 derniers jours)</h6>
+                  <div className="table-responsive">
+                    <table className="table table-sm">
+                      <thead><tr><th>Date</th><th>Commandes</th><th className="text-end">Revenus</th></tr></thead>
+                      <tbody>{advancedStats.evolution_7j.map((d,idx)=>(<tr key={idx}><td>{new Date(d.date).toLocaleDateString('fr-FR')}</td><td>{d.nombre_commandes}</td><td className="text-end">{parseFloat(d.revenu||0).toFixed(2)}€</td></tr>))}</tbody>
+                    </table>
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </>
         )}
       </Container>
     </>

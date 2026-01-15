@@ -10,12 +10,14 @@ import { AuthContext } from './context/AuthContext';
 import './App.css';
 
 import RestaurantSettingsModal from './components/RestaurantSettingsModal';
+// StatsModal removed: use full `/stats` page instead
 
 function Navigation() {
   const location = useLocation();
   const { logout, user } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showRestModal, setShowRestModal] = useState(false);
+  // stats page uses route /stats
   
   return (
     <nav className="admin-nav">
@@ -71,6 +73,7 @@ function Navigation() {
             </button>
           </div>
           <RestaurantSettingsModal show={showRestModal} onHide={() => setShowRestModal(false)} />
+          {/* Stats page is a full route at /stats */}
         </div>
       </div>
     </nav>

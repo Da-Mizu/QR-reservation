@@ -41,18 +41,36 @@ function Dashboard() {
   const [seenCommandeIds, setSeenCommandeIds] = useState(new Set());
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [selectedCommande, setSelectedCommande] = useState(null);
+  const [advancedStats, setAdvancedStats] = useState(null);
+  const [showStats, setShowStats] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
     chargerCommandes();
+    chargerStatsAvancees();
     let interval;
     if (autoRefresh) {
-      interval = setInterval(chargerCommandes, 5000);
+      interval = setInterval(() => {
+        chargerCommandes();
+        chargerStatsAvancees();
+      }, 5000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [autoRefresh, token]);
+
+  const chargerStatsAvancees = async () => {
+    try {
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const response = await axios.get(`${API_URL}/stats/advanced`, config);
+      setAdvancedStats(response.data || {});
+    } catch (error) {
+      console.error('Erreur lors du chargement des stats avancées:', error);
+      // Affiche une erreur au lieu de rester bloqué
+      setAdvancedStats({ error: 'Erreur lors du chargement des statistiques' });
+    }
+  };
 
   const chargerCommandes = async () => {
     try {
@@ -483,6 +501,8 @@ function Dashboard() {
         )}
       </Row>
     </Container>
+    
+    
     
     <InvoiceModal 
       show={showInvoiceModal}
