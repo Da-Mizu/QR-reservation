@@ -1,0 +1,68 @@
+/* KDS Styles */
+
+.kds-card {
+  border-left: 4px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  min-height: 200px;
+}
+
+.kds-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.kds-card-en_attente {
+  border-left-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.kds-card-en_preparation {
+  border-left-color: #ffc107;
+  background-color: #fffaf0;
+}
+
+.kds-card-prete {
+  border-left-color: #28a745;
+  background-color: #f0fdf4;
+}
+
+.kds-card h5 {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.kds-card-header {
+  font-weight: bold;
+}
+
+/* KDS Controls */
+.kds-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kds-card {
+    min-height: 180px;
+  }
+  
+  .kds-card h5 {
+    font-size: 0.95rem;
+  }
+}
+
+/* Full screen mode optimizations */
+@media (orientation: landscape) and (max-height: 700px) {
+  .kds-card {
+    min-height: 150px;
+  }
+  
+  .kds-card .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}

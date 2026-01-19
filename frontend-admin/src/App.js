@@ -6,6 +6,7 @@ import Login from './components/Login';
 import QRGenerator from './components/QRGenerator';
 import TableMap from './components/TableMap';
 import MenuManager from './components/MenuManager';
+import KDSView from './components/KDS/KDSView';
 import { AuthContext } from './context/AuthContext';
 import './App.css';
 
@@ -61,6 +62,13 @@ function Navigation() {
             onClick={() => setMenuOpen(false)}
           >
             🍽️ Gestion Menu
+          </Link>
+          <Link 
+            to="/kds" 
+            className={location.pathname === '/kds' ? 'nav-link active' : 'nav-link'}
+            onClick={() => setMenuOpen(false)}
+          >
+            🍳 KDS
           </Link>
           
           <div className="nav-user">
@@ -143,8 +151,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
-// Reports route removed — export CSV now in Stats
-          
+          <Route 
+            path="/kds" 
+            element={
+              <ProtectedRoute>
+                <KDSView />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </div>
     </Router>
