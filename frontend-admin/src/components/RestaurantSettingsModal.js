@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import { AuthContext } from '../context/AuthContext';
+import StationManager from './StationManager';
 
 export default function RestaurantSettingsModal({ show, onHide }) {
   const { token, user, login } = useContext(AuthContext);
@@ -8,6 +9,7 @@ export default function RestaurantSettingsModal({ show, onHide }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ nom: '', email: '', telephone: '', adresse: '' });
+  const [showStationManager, setShowStationManager] = useState(false);
 
   useEffect(() => {
     if (!show) return;
@@ -122,6 +124,13 @@ export default function RestaurantSettingsModal({ show, onHide }) {
               <Form.Label>Email</Form.Label>
               <Form.Control type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </Form.Group>
+
+            {/* Station Manager link */}
+            <div className="border-top pt-3 mt-3">
+              <Button variant="outline-primary" className="w-100" onClick={() => setShowStationManager(true)}>
+                🍳 Gestion des Postes
+              </Button>
+            </div>
           </Form>
         )}
       </Modal.Body>
@@ -129,6 +138,9 @@ export default function RestaurantSettingsModal({ show, onHide }) {
         <Button variant="secondary" onClick={onHide}>Annuler</Button>
         <Button variant="primary" onClick={handleSave} disabled={saving}>{saving ? 'Enregistrement...' : 'Enregistrer'}</Button>
       </Modal.Footer>
+
+      {/* Station Manager Modal */}
+      <StationManager show={showStationManager} onHide={() => setShowStationManager(false)} />
     </Modal>
   );
 }

@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Container, Row, Col, Navbar, Nav, Button, Form } from 'react-bootstrap';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './KDSStyles.css';
 import { useKDSData } from '../../hooks/useKDSData';
@@ -7,16 +8,47 @@ import KDSList from './KDSList';
 import KDSFilters from './KDSFilters';
 import KDSControls from './KDSControls';
 
+const RAW_API_URL = process.env.REACT_APP_API_URL || 'http://localhost/QR-reservation/backend-php';
+const API_BASE = RAW_API_URL.replace(/\/$/, '');
+const API_URL = `${API_BASE}/api`;
+
 function KDSView() {
   const { orders, loading, error, useSSE, updateOrderStatus, assignStation, refresh } = useKDSData();
   const [selectedStation, setSelectedStation] = useState('all');
   const [statusFilter, setStatusFilter] = useState(['en_attente', 'en_preparation', 'prete']);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [dbStations, setDbStations] = useState([]);
+  const [loadingStations, setLoadingStations] = useState(false);
 
-  // Extract unique stations from orders
+  // Load stations from database on mount
+  useEffect(() => {
+    const chargerStations = async () => {
+      try {
+        setLoadingStations(true);
+        const response = await axios.get(`${API_URL}/stations`);
+        const stationsData = Array.isArray(response.data) ? response.data : [];
+        setDbStations(stationsData);
+      } catch (err) {
+        console.error('Erreur chargement stations:', err);
+        setDbStations([]);
+      } finally {
+        setLoadingStations(false);
+      }
+    };
+    chargerStations();
+  }, []);
+
+  // Extract unique stations from orders + database stations
   const stations = useMemo(() => {
     const stationSet = new Set(['general']);
+    
+    // Add stations from database
+    dbStations.forEach(station => {
+      stationSet.add(station.nom);
+    });
+    
+    // Add stations from items in orders
     orders.forEach(order => {
       if (order.items) {
         order.items.forEach(item => {
@@ -24,8 +56,20 @@ function KDSView() {
         });
       }
     });
-    return Array.from(stationSet).sort();
-  }, [orders]);
+    return Array.from(stationSet).sort((a, b) => a.localeCompare(b));
+  }, [orders, dbStations]);
+
+  // Utility: get readable text color (#000 or #fff) based on background hex
+  const getContrastColor = (hex) => {
+    if (!hex) return '#000000';
+    const c = hex.replace('#', '');
+    const r = parseInt(c.substring(0,2),16);
+    const g = parseInt(c.substring(2,4),16);
+    const b = parseInt(c.substring(4,6),16);
+    // Perceived luminance
+    const luminance = (0.299*r + 0.587*g + 0.114*b)/255;
+    return luminance > 0.6 ? '#000000' : '#ffffff';
+  };
 
   // Filter and group orders by station
   const filteredOrders = useMemo(() => {
@@ -72,12 +116,12 @@ function KDSView() {
     <>
       <Navbar bg="dark" expand="lg" sticky="top" className="border-bottom">
         <Container fluid>
-          <Navbar.Brand className="fw-bold text-white">🍳 KDS</Navbar.Brand>
+          <Navbar.Brand className="fw-bold text-white">KDS</Navbar.Brand>
           <Navbar.Toggle aria-controls="navbar-nav" />
           <Navbar.Collapse id="navbar-nav" className="justify-content-end">
             <Nav className="gap-2 align-items-center">
               <span className={`badge ${useSSE ? 'bg-success' : 'bg-warning'} text-dark`}>
-                {useSSE ? '🔴 Temps réel' : '⏱️ Polling'}
+                {useSSE ? 'Temps réel' : 'Polling'}
               </span>
               <KDSControls
                 autoRefresh={autoRefresh}
@@ -113,16 +157,29 @@ function KDSView() {
               >
                 Tous
               </Button>
-              {stations.map(station => (
-                <Button
-                  key={station}
-                  size="sm"
-                  variant={selectedStation === station ? 'primary' : 'outline-secondary'}
-                  onClick={() => setSelectedStation(station)}
-                >
-                  {station.charAt(0).toUpperCase() + station.slice(1)}
-                </Button>
-              ))}
+              {stations.map(station => {
+                const stationData = dbStations.find(s => s.nom === station);
+                const couleur = stationData?.couleur || '#6c757d';
+                const isSelected = selectedStation === station;
+                const textColor = getContrastColor(couleur);
+                return (
+                  <Button
+                    key={station}
+                    size="sm"
+                    className="station-btn"
+                    style={{
+                      backgroundColor: couleur,
+                      borderColor: couleur,
+                      borderWidth: '2px',
+                      borderStyle: 'solid',
+                      color: textColor
+                    }}
+                    onClick={() => setSelectedStation(station)}
+                  >
+                    {station.length > 20 ? station.substring(0, 17) + '...' : station}
+                  </Button>
+                );
+              })}
             </div>
           </Col>
         </Row>

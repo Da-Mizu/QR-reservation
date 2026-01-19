@@ -13,6 +13,7 @@ const API_URL = `${API_BASE}/api`;
 
 function MenuManager() {
   const [produits, setProduits] = useState([]);
+  const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProduit, setEditingProduit] = useState(null);
@@ -24,14 +25,29 @@ function MenuManager() {
     description: '',
     prix: '',
     categorie: '',
-    disponible: true
+    disponible: true,
+    station: ''
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     chargerProduits();
+    chargerStations();
   }, [token]);
+
+  const chargerStations = async () => {
+    try {
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+      const response = await axios.get(`${API_URL}/stations`, config);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setStations(data);
+    } catch (error) {
+      console.error('Erreur chargement stations:', error);
+      setStations([]);
+      // Non-fatal, continue without stations
+    }
+  };
 
   const chargerProduits = async () => {
     try {
@@ -54,7 +70,8 @@ function MenuManager() {
         description: produit.description || '',
         prix: produit.prix || '',
         categorie: produit.categorie || '',
-        disponible: produit.disponible === 1 || produit.disponible === true
+        disponible: produit.disponible === 1 || produit.disponible === true,
+        station: produit.station || ''
       });
       setImagePreview(produit.image || null);
     } else {
@@ -64,7 +81,8 @@ function MenuManager() {
         description: '',
         prix: '',
         categorie: '',
-        disponible: true
+        disponible: true,
+        station: ''
       });
       setImagePreview(null);
       setImageFile(null);
@@ -124,6 +142,7 @@ function MenuManager() {
         fd.append('description', formData.description || '');
         fd.append('prix', parseFloat(formData.prix));
         fd.append('categorie', formData.categorie || '');
+        fd.append('station', formData.station || '');
         fd.append('disponible', formData.disponible ? 1 : 0);
         fd.append('image', imageFile);
 
@@ -225,6 +244,7 @@ function MenuManager() {
                     <th>Description</th>
                     <th>Prix</th>
                     <th>Catégorie</th>
+                    <th>Poste</th>
                     <th>Disponible</th>
                     <th>Actions</th>
                   </tr>
@@ -232,7 +252,7 @@ function MenuManager() {
                 <tbody>
                   {produits.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center text-muted">
+                      <td colSpan="7" className="text-center text-muted">
                         Aucun produit trouvé
                       </td>
                     </tr>
@@ -245,6 +265,13 @@ function MenuManager() {
                         <td>
                           {produit.categorie ? (
                             <Badge bg="secondary">{produit.categorie}</Badge>
+                          ) : (
+                            <span className="text-muted">—</span>
+                          )}
+                        </td>
+                        <td>
+                          {produit.station ? (
+                            <Badge bg="info">{produit.station}</Badge>
                           ) : (
                             <span className="text-muted">—</span>
                           )}
@@ -348,6 +375,25 @@ function MenuManager() {
               </datalist>
               <Form.Text className="text-muted">
                 Tapez une nouvelle catégorie ou choisissez parmi les existantes
+              </Form.Text>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Poste de préparation</Form.Label>
+              <Form.Select
+                name="station"
+                value={formData.station}
+                onChange={handleChange}
+              >
+                <option value="">Aucun</option>
+                {stations.map(station => (
+                  <option key={station.id} value={station.nom}>
+                    {station.nom}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-muted">
+                Sélectionnez le poste responsable de ce produit
               </Form.Text>
             </Form.Group>
 

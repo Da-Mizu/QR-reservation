@@ -36,6 +36,23 @@
   font-weight: bold;
 }
 
+/* Station Button */
+.station-btn {
+  border: 2px solid !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 0.375rem 0.75rem !important;
+}
+
+.station-btn:focus,
+.station-btn:active {
+  box-shadow: none !important;
+}
+
+.station-btn:hover {
+  opacity: 0.85;
+}
+
 /* KDS Controls */
 .kds-controls {
   display: flex;
