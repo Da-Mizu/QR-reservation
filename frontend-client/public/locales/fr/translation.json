@@ -1,0 +1,54 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "back": "Retour",
+    "submit": "Soumettre",
+    "retry": "Réessayer"
+  },
+  "menu": {
+    "title": "Menu",
+    "search": "Rechercher",
+    "allCategories": "Toutes les catégories",
+    "price": "Prix",
+    "add": "Ajouter",
+    "outOfStock": "Rupture de stock",
+    "noProducts": "Aucun produit disponible"
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide",
+    "total": "Total",
+    "checkout": "Commander",
+    "quantity": "Quantité",
+    "price": "Prix",
+    "remove": "Supprimer",
+    "continue": "Continuer"
+  },
+  "order": {
+    "title": "Passer une commande",
+    "tableNumber": "Numéro de table",
+    "notes": "Notes spéciales",
+    "place": "Passer la commande",
+    "confirmation": "Votre commande a été confirmée",
+    "orderNumber": "Numéro de commande",
+    "thankYou": "Merci pour votre commande!",
+    "estimatedTime": "Temps estimé",
+    "minutes": "minutes"
+  },
+  "scanner": {
+    "title": "Scanner QR",
+    "scanning": "Scan en cours...",
+    "error": "Erreur lors du scan",
+    "retry": "Réessayer"
+  },
+  "header": {
+    "language": "Langue",
+    "french": "Français",
+    "english": "Anglais"
+  }
+}

@@ -214,3 +214,24 @@
 .btn-secondary:hover {
   background: #5a6268;
 }
+/* Language Selector */
+.language-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  font-size: 0.9rem;
+  min-width: 110px;
+}
+
+.language-select:hover {
+  border-color: #999;
+}
+
+.language-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}

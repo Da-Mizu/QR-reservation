@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "submit": "Submit",
+    "retry": "Retry"
+  },
+  "navbar": {
+    "dashboard": "Dashboard",
+    "menu": "Menu",
+    "kds": "KDS",
+    "stats": "Statistics",
+    "settings": "Settings",
+    "qrGenerator": "QR Generator",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Order Management",
+    "orders": "Orders",
+    "status": "Status",
+    "table": "Table",
+    "updateStatus": "Update Status",
+    "errorUpdatingStatus": "Error updating status",
+    "startPreparing": "Start Preparing",
+    "markReady": "Mark Ready",
+    "markServed": "Mark Served",
+    "cancel": "Cancel",
+    "waiting": "Waiting",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "served": "Served",
+    "cancelled": "Cancelled"
+  },
+  "kds": {
+    "title": "Kitchen",
+    "station": "Station",
+    "all": "All",
+    "realTime": "Real-time",
+    "polling": "Polling",
+    "noOrders": "No orders to display",
+    "minutes": "min",
+    "late": "LATE"
+  },
+  "stats": {
+    "title": "Statistics",
+    "today": "Today",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last6Months": "Last 6 months",
+    "lastYear": "Last year",
+    "orders": "Orders",
+    "revenue": "Revenue",
+    "averageOrderValue": "Average order value"
+  },
+  "menu": {
+    "title": "Menu Management",
+    "addProduct": "Add Product",
+    "editProduct": "Edit Product",
+    "deleteProduct": "Delete Product",
+    "productName": "Product Name",
+    "description": "Description",
+    "price": "Price",
+    "category": "Category",
+    "station": "Station",
+    "available": "Available",
+    "image": "Image",
+    "nameRequired": "Name is required",
+    "priceRequired": "Price is required",
+    "errorAdding": "Error adding product",
+    "errorDeleting": "Error deleting product"
+  },
+  "stationManager": {
+    "title": "Station Management",
+    "addStation": "Add Station",
+    "editStation": "Edit Station",
+    "deleteStation": "Delete Station",
+    "stationName": "Station Name",
+    "description": "Description",
+    "color": "Color",
+    "products": "Associated Products",
+    "nameRequired": "Station name is required",
+    "errorAdding": "Error adding station",
+    "errorDeleting": "Error deleting station",
+    "confirmDelete": "Are you sure you want to delete this station?",
+    "assignProducts": "Assign Products"
+  },
+  "qrGenerator": {
+    "title": "QR Code Generator for Tables",
+    "clientUrl": "Menu URL (frontend client)",
+    "restaurantId": "Restaurant ID",
+    "tableNumber": "Table Number (optional)",
+    "generate": "Generate",
+    "download": "Download",
+    "enterUrl": "Please enter a URL",
+    "libraryError": "Error: QRCode library not loaded",
+    "generateFirst": "Please generate a QR code first"
+  },
+  "settings": {
+    "title": "Restaurant Settings",
+    "language": "Language",
+    "french": "French",
+    "english": "English"
+  }
+}

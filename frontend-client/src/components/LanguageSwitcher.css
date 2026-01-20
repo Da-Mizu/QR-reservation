@@ -1,0 +1,31 @@
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.language-switcher label {
+  font-weight: 600;
+  margin: 0;
+}
+
+.lang-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  min-width: 120px;
+}
+
+.lang-select:hover {
+  border-color: #999;
+}
+
+.lang-select:focus {
+  outline: none;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}

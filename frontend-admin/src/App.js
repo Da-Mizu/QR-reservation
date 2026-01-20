@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Dashboard from './components/Dashboard';
 import Stats from './components/Stats';
 import Login from './components/Login';
@@ -16,9 +17,9 @@ import RestaurantSettingsModal from './components/RestaurantSettingsModal';
 function Navigation() {
   const location = useLocation();
   const { logout, user } = useContext(AuthContext);
+  const { t, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showRestModal, setShowRestModal] = useState(false);
-  // stats page uses route /stats
   
   return (
     <nav className="admin-nav">
@@ -33,55 +34,62 @@ function Navigation() {
             className={location.pathname === '/' ? 'nav-link active' : 'nav-link'}
             onClick={() => setMenuOpen(false)}
           >
-            📋 Commandes
+            {t('navbar.dashboard')}
           </Link>
           <Link 
             to="/stats" 
             className={location.pathname === '/stats' ? 'nav-link active' : 'nav-link'}
             onClick={() => setMenuOpen(false)}
           >
-            📊 Statistiques
+            {t('navbar.stats')}
           </Link>
           <Link 
             to="/qr-generator" 
             className={location.pathname === '/qr-generator' ? 'nav-link active' : 'nav-link'}
             onClick={() => setMenuOpen(false)}
           >
-            📱 Générer QR
+            {t('navbar.qrGenerator')}
           </Link>
           <Link 
             to="/table-map" 
             className={location.pathname === '/table-map' ? 'nav-link active' : 'nav-link'}
             onClick={() => setMenuOpen(false)}
           >
-            🗺️ Plan du restaurant
+            {t('navbar.dashboard')}
           </Link>
           <Link 
             to="/menu" 
             className={location.pathname === '/menu' ? 'nav-link active' : 'nav-link'}
             onClick={() => setMenuOpen(false)}
           >
-            🍽️ Gestion Menu
+            {t('navbar.menu')}
           </Link>
           <Link 
             to="/kds" 
             className={location.pathname === '/kds' ? 'nav-link active' : 'nav-link'}
             onClick={() => setMenuOpen(false)}
           >
-            🍳 KDS
+            {t('navbar.kds')}
           </Link>
           
           <div className="nav-user">
+            <select 
+              value={i18n.language} 
+              onChange={(e) => i18n.changeLanguage(e.target.value)}
+              className="language-select"
+            >
+              <option value="fr">{t('settings.french')}</option>
+              <option value="en">{t('settings.english')}</option>
+            </select>
             <a href="#" className="user-email" onClick={(e) => { e.preventDefault(); setShowRestModal(true); }}>{user?.email}</a>
             <button className="btn-logout" onClick={() => {
               logout();
               setMenuOpen(false);
             }}>
-              🚪 Déconnexion
+              {t('navbar.logout')}
             </button>
           </div>
           <RestaurantSettingsModal show={showRestModal} onHide={() => setShowRestModal(false)} />
-          {/* Stats page is a full route at /stats */}
         </div>
       </div>
     </nav>
@@ -90,9 +98,10 @@ function Navigation() {
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useContext(AuthContext);
+  const { t } = useTranslation();
   
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Chargement...</div>;
+    return <div style={{ padding: '20px', textAlign: 'center' }}>{t('common.loading')}</div>;
   }
   
   return user ? children : <Navigate to="/login" />;
@@ -100,9 +109,10 @@ function ProtectedRoute({ children }) {
 
 function App() {
   const { user, loading } = useContext(AuthContext);
+  const { t } = useTranslation();
   
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Chargement...</div>;
+    return <div style={{ padding: '20px', textAlign: 'center' }}>{t('common.loading')}</div>;
   }
   
   return (
