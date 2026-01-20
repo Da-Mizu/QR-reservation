@@ -33,6 +33,11 @@
 - Admin : http://localhost:3002
 - Client : http://localhost:3003
 
+## Nouvelles sections importantes
+- KDS (Kitchen Display System) : affichage temps réel des commandes par poste (stations). Voir `frontend-admin/src/components/KDS` et l'endpoint SSE `backend-php/endpoints/commandes_stream.php`.
+- Stations (postes) : gestion CRUD des postes et assignation de produits. Migration SQL : `documentation/MIGRATION_STATIONS.sql`. Endpoint : `backend-php/endpoints/stations.php`.
+- Multilingue (i18n) : support FR/EN intégré dans les frontends via `i18next`. Fichiers de traduction : `frontend-*/public/locales/{fr,en}/translation.json`.
+
 ## Scripts utiles
 - Tests API : `test-login.ps1`, `test-auth.ps1`
 - Commandes : `test-commande-restaurant.ps1`, `test-commande-restaurant-2.ps1`

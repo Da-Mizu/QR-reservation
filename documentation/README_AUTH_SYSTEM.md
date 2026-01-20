@@ -24,6 +24,15 @@ Token : `base64(restaurant_id:email:timestamp)` (7 jours), envoyé en `Authoriza
 - `frontend-admin/src/context/AuthContext.js`, `frontend-admin/src/components/Login.js`
 - `frontend-client/src/components/Scanner.js`
 
+## Nouvelles fonctionnalités & notes
+- KDS (Kitchen Display System) : affichage et filtrage des commandes par poste. Frontend : `frontend-admin/src/components/KDS/*`. Backend SSE endpoint : `backend-php/endpoints/commandes_stream.php`.
+- Stations (postes) : table `stations` + colonne `produits.station`. Migration : `documentation/MIGRATION_STATIONS.sql`. API : `backend-php/endpoints/stations.php` (GET/POST/PATCH/DELETE + /assign).
+- Multilingue : FR/EN supportés dans les frontends via `i18next`. Traductions stockées sous `public/locales/{fr,en}/translation.json` des deux frontends.
+
+## Remarques techniques
+- `stations.php` utilise désormais les helpers exposés par `index.php` (`respond()`, `json_input()`, `getAuthToken()`), évitant les déclarations redondantes.
+- Pour activer les postes, exécutez `documentation/MIGRATION_STATIONS.sql` puis redémarrez Apache/MySQL.
+
 ## Liens utiles
 - Aperçu & flux : [README.md](README.md)
 - Démarrage rapide : [QUICKSTART.md](QUICKSTART.md)

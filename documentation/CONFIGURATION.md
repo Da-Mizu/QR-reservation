@@ -19,10 +19,19 @@ $DB_NAME = getenv('DB_NAME') ?: 'qr_reservation';   // Nom base de données
 ### Frontend Admin (frontend-admin/.env)
 
 ```env
-REACT_APP_API_URL=http://localhost/QR-reservation/backend-php/index.php/api
+REACT_APP_API_URL=http://localhost/QR-reservation/backend-php
 PORT=3002
 SKIP_PREFLIGHT_CHECK=true
 DANGEROUSLY_DISABLE_HOST_CHECK=true
+```
+
+Note: `REACT_APP_API_URL` doit pointer vers la racine du backend. Les frontends construisent ensuite l'URL finale vers `/api`.
+
+## Langue / i18n
+Les frontends supportent FR/EN via `i18next`. La langue est détectée automatiquement et sauvegardée dans `localStorage`. Pour forcer une langue en dev, définissez `i18next` key dans `localStorage` ou utilisez le sélecteur UI.
+
+## Migration Stations
+Le fichier `documentation/MIGRATION_STATIONS.sql` contient la migration pour ajouter la table `stations` et la colonne `produits.station`. Exécutez-la si vous souhaitez activer la gestion des postes.
 ```
 
 **Modifications:**

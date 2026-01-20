@@ -8,6 +8,17 @@
 3. Attendre le message "✓ Base de données réinitialisée avec succès"
 4. (Optionnel) Cliquer "Tester l'authentification"
 
+**Remarque migration postes (stations)**
+Si vous ajoutez les postes (stations) à une base existante, exécutez le script de migration fourni :
+
+```sql
+-- documentation/MIGRATION_STATIONS.sql
+-- Ajoute la table `stations` et la colonne `produits.station`
+ALTER TABLE produits ADD COLUMN station VARCHAR(100) DEFAULT NULL AFTER categorie;
+CREATE TABLE IF NOT EXISTS stations (...);
+```
+Après exécution, redémarrez Apache/MySQL si nécessaire.
+
 **Option B: Via cURL**
 ```bash
 curl -X POST http://localhost/QR-reservation/backend-php/index.php/api/db/reset \
@@ -44,6 +55,24 @@ npm install
 npm start
 ```
 Ports configurables via `.env` (PORT=3002 admin, PORT=3003 client).
+
+## Lancer les deux frontends (dev)
+
+Pour tester rapidement le multilingue et le KDS, lancez d'abord le backend (Apache/XAMPP), puis :
+
+```bash
+# Terminal 1 - Admin
+cd frontend-admin
+npm install
+npm start
+
+# Terminal 2 - Client
+cd frontend-client
+npm install
+npm start
+```
+
+Ouvrez `http://localhost:3002` (admin) et `http://localhost:3003` (client). Le sélecteur de langue est disponible dans les deux UI.
 
 ## Comptes démo
 - admin@demo.local / demo123 (restaurant 1)

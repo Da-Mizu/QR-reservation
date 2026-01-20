@@ -79,6 +79,25 @@ En attente → En préparation → Prête → Servie → En attente de paiement 
 - **Fichier fond** : `frontend-admin/public/background.png` (généré via Node.js Canvas)
 - **Script génération** : `generate-restaurant-plan.js`
 
+### 3. Kitchen Display System (KDS)
+- **But** : Afficher les commandes en temps réel par poste (station) pour la cuisine.
+- **Frontend** : `frontend-admin/src/components/KDS/*` (KDSView, KDSList, KDSOrderCard, KDSControls, KDSFilters)
+- **Backend** : `backend-php/endpoints/commandes_stream.php` (SSE), `backend-php/endpoints/commandes.php` (API commandes)
+- **Fonctionnalités** : filtrage par station, mise à jour de statut, sonnerie lors d'une commande prête, fallback polling si SSE non disponible.
+
+### 4. Stations (Postes)
+- **But** : Permettre de créer/supprimer/modifier des postes (ex: Cuisine, Bar) et d'assigner des produits à un poste.
+- **DB** : table `stations` (voir `documentation/MIGRATION_STATIONS.sql`) et colonne `produits.station`.
+- **Frontend** : `frontend-admin/src/components/StationManager.js`, intégration dans `MenuManager` pour assignation produit → station.
+- **Backend** : `backend-php/endpoints/stations.php` (GET, POST, PATCH, DELETE, POST /assign)
+- **Notes** : `stations.php` utilise maintenant les helpers de `index.php` (`respond()`, `json_input()`, `getAuthToken()`), ne redéclare pas de fonctions.
+
+### 5. Multilingue (i18n)
+- **But** : Support FR/EN dans les deux frontends.
+- **Librairie** : `i18next` + `react-i18next` + `i18next-browser-languagedetector`.
+- **Fichiers** : `frontend-admin/public/locales/{fr,en}/translation.json` et `frontend-client/public/locales/{fr,en}/translation.json`.
+- **Initialisation** : `src/i18n.js` dans chaque frontend; importé depuis `index.js`.
+
 ### 3. Dashboard Amélioré
 - **Stats** : Compteurs pour chaque statut + total revenus (terminee uniquement)
 - **Filtrage** : Par statut (toutes, en_attente, en_preparation, prete, servie, en_attente_de_paiement, terminee, annulee)

@@ -80,6 +80,11 @@ QR Reservation est une application de commande par QR code avec multi‑restaura
 - QR : les liens contiennent `restaurant=<id>` et `table=<num>`. Exemple : `http://localhost:3003/menu?restaurant=2&table=12`.
 - Comptes démo : `admin@demo.local / demo123` (restaurant 1) et `testresto@demo.local / test123` (restaurant 2).
 
+### Nouveautés importantes
+- KDS (Kitchen Display System) : affichage temps réel des commandes par poste (stations) pour la cuisine. Frontend : `frontend-admin/src/components/KDS`, backend SSE : `backend-php/endpoints/commandes_stream.php`.
+- Stations (postes) : gestion CRUD des postes et assignation des produits ; migration SQL disponible : `documentation/MIGRATION_STATIONS.sql` et endpoint : `backend-php/endpoints/stations.php`.
+- Multilingue : support FR/EN pour les frontends via `i18next`. Traductions : `frontend-*/public/locales/{fr,en}/translation.json`.
+
 ## Prérequis
 - Node.js 18+
 - npm
