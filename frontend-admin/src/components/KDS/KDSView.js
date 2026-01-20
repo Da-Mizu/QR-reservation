@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Container, Row, Col, Navbar, Nav, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Navbar, Nav, Button } from 'react-bootstrap';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './KDSStyles.css';
@@ -19,21 +19,17 @@ function KDSView() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [dbStations, setDbStations] = useState([]);
-  const [loadingStations, setLoadingStations] = useState(false);
 
   // Load stations from database on mount
   useEffect(() => {
     const chargerStations = async () => {
       try {
-        setLoadingStations(true);
         const response = await axios.get(`${API_URL}/stations`);
         const stationsData = Array.isArray(response.data) ? response.data : [];
         setDbStations(stationsData);
       } catch (err) {
         console.error('Erreur chargement stations:', err);
         setDbStations([]);
-      } finally {
-        setLoadingStations(false);
       }
     };
     chargerStations();
@@ -160,7 +156,6 @@ function KDSView() {
               {stations.map(station => {
                 const stationData = dbStations.find(s => s.nom === station);
                 const couleur = stationData?.couleur || '#6c757d';
-                const isSelected = selectedStation === station;
                 const textColor = getContrastColor(couleur);
                 return (
                   <Button

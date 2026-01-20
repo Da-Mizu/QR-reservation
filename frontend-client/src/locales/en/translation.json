@@ -1,0 +1,54 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "submit": "Submit",
+    "retry": "Retry"
+  },
+  "menu": {
+    "title": "Menu",
+    "search": "Search",
+    "allCategories": "All Categories",
+    "price": "Price",
+    "add": "Add",
+    "outOfStock": "Out of Stock",
+    "noProducts": "No products available"
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is empty",
+    "total": "Total",
+    "checkout": "Order",
+    "quantity": "Quantity",
+    "price": "Price",
+    "remove": "Remove",
+    "continue": "Continue"
+  },
+  "order": {
+    "title": "Place Order",
+    "tableNumber": "Table Number",
+    "notes": "Special Notes",
+    "place": "Place Order",
+    "confirmation": "Your order has been confirmed",
+    "orderNumber": "Order Number",
+    "thankYou": "Thank you for your order!",
+    "estimatedTime": "Estimated Time",
+    "minutes": "minutes"
+  },
+  "scanner": {
+    "title": "QR Scanner",
+    "scanning": "Scanning...",
+    "error": "Error scanning",
+    "retry": "Retry"
+  },
+  "header": {
+    "language": "Language",
+    "french": "French",
+    "english": "English"
+  }
+}

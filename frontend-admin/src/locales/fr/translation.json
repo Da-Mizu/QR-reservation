@@ -1,0 +1,112 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "back": "Retour",
+    "submit": "Soumettre",
+    "retry": "Réessayer"
+  },
+  "navbar": {
+    "dashboard": "Tableau de bord",
+    "menu": "Menu",
+    "kds": "KDS",
+    "stats": "Statistiques",
+    "settings": "Paramètres",
+    "qrGenerator": "Générateur QR",
+    "logout": "Déconnexion"
+  },
+  "dashboard": {
+    "title": "Gestion des commandes",
+    "orders": "Commandes",
+    "status": "Statut",
+    "table": "Table",
+    "updateStatus": "Mettre à jour le statut",
+    "errorUpdatingStatus": "Erreur lors de la mise à jour du statut",
+    "startPreparing": "Commencer la préparation",
+    "markReady": "Marquer comme prêt",
+    "markServed": "Marquer comme servi",
+    "cancel": "Annuler",
+    "waiting": "En attente",
+    "preparing": "En préparation",
+    "ready": "Prête",
+    "served": "Servie",
+    "cancelled": "Annulée"
+  },
+  "kds": {
+    "title": "Cuisine",
+    "station": "Poste",
+    "all": "Tous",
+    "realTime": "Temps réel",
+    "polling": "Polling",
+    "noOrders": "Aucune commande à afficher",
+    "minutes": "min",
+    "late": "RETARD"
+  },
+  "stats": {
+    "title": "Statistiques",
+    "today": "Aujourd'hui",
+    "last7Days": "7 derniers jours",
+    "last30Days": "30 derniers jours",
+    "last6Months": "6 derniers mois",
+    "lastYear": "Dernier an",
+    "orders": "Commandes",
+    "revenue": "Chiffre d'affaires",
+    "averageOrderValue": "Valeur moyenne"
+  },
+  "menu": {
+    "title": "Gestion du menu",
+    "addProduct": "Ajouter un produit",
+    "editProduct": "Modifier le produit",
+    "deleteProduct": "Supprimer le produit",
+    "productName": "Nom du produit",
+    "description": "Description",
+    "price": "Prix",
+    "category": "Catégorie",
+    "station": "Poste",
+    "available": "Disponible",
+    "image": "Image",
+    "nameRequired": "Le nom est requis",
+    "priceRequired": "Le prix est requis",
+    "errorAdding": "Erreur lors de l'ajout du produit",
+    "errorDeleting": "Erreur lors de la suppression"
+  },
+  "stationManager": {
+    "title": "Gestion des postes",
+    "addStation": "Ajouter un poste",
+    "editStation": "Modifier le poste",
+    "deleteStation": "Supprimer le poste",
+    "stationName": "Nom du poste",
+    "description": "Description",
+    "color": "Couleur",
+    "products": "Produits associés",
+    "nameRequired": "Le nom du poste est requis",
+    "errorAdding": "Erreur lors de l'ajout du poste",
+    "errorDeleting": "Erreur lors de la suppression",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce poste ?",
+    "assignProducts": "Attribuer des produits"
+  },
+  "qrGenerator": {
+    "title": "Générateur de QR Code pour les tables",
+    "clientUrl": "URL du menu (frontend client)",
+    "restaurantId": "ID du restaurant",
+    "tableNumber": "Numéro de table (optionnel)",
+    "generate": "Générer",
+    "download": "Télécharger",
+    "enterUrl": "Veuillez entrer une URL",
+    "libraryError": "Erreur: Librairie QRCode non chargée",
+    "generateFirst": "Veuillez d'abord générer un QR code"
+  },
+  "settings": {
+    "title": "Paramètres du restaurant",
+    "language": "Langue",
+    "french": "Français",
+    "english": "Anglais"
+  }
+}
