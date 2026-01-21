@@ -9,6 +9,7 @@ import TableMap from './components/TableMap';
 import MenuManager from './components/MenuManager';
 import KDSView from './components/KDS/KDSView';
 import { AuthContext } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 import './App.css';
 
 import RestaurantSettingsModal from './components/RestaurantSettingsModal';
@@ -18,6 +19,7 @@ function Navigation() {
   const location = useLocation();
   const { logout, user } = useContext(AuthContext);
   const { t, i18n } = useTranslation();
+  const { isDark, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showRestModal, setShowRestModal] = useState(false);
   
@@ -73,6 +75,13 @@ function Navigation() {
           </Link>
           
           <div className="nav-user">
+            <button 
+              className="theme-toggle" 
+              onClick={toggleTheme}
+              title={isDark ? 'Light mode' : 'Dark mode'}
+            >
+              {isDark ? '☀️' : '🌙'}
+            </button>
             <select 
               value={i18n.language} 
               onChange={(e) => i18n.changeLanguage(e.target.value)}

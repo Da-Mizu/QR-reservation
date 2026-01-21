@@ -1,0 +1,416 @@
+/* Dark Mode CSS Variables and Styles */
+
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --input-bg: #ffffff;
+  --input-border: #ced4da;
+  --input-text: #212529;
+  --hover-bg: #f8f9fa;
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3d3d3d;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #404040;
+  --card-bg: #2d2d2d;
+  --card-shadow: rgba(0, 0, 0, 0.5);
+  --input-bg: #3d3d3d;
+  --input-border: #505050;
+  --input-text: #e0e0e0;
+  --hover-bg: #3d3d3d;
+}
+
+/* Force theme on html and body */
+html[data-theme="dark"],
+html.dark-mode {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+
+html[data-theme="light"] {
+  background-color: #ffffff !important;
+  color: #212529 !important;
+}
+
+body[data-theme="dark"],
+body.dark-mode {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+
+body[data-theme="light"] {
+  background-color: #ffffff !important;
+  color: #212529 !important;
+}
+
+/* Main App container - force background */
+.App {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Container and rows */
+.container,
+.container-fluid,
+.row {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Navigation */
+.client-nav {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-top: none !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.client-nav::before,
+.client-nav::after {
+  display: none !important;
+  border: none !important;
+}
+
+.client-nav * {
+  border-top: none !important;
+}
+
+.client-nav .nav-title {
+  color: var(--text-primary) !important;
+}
+
+.nav-links {
+  border-top: none !important;
+  border-bottom: none !important;
+  background: var(--bg-secondary) !important;
+}
+
+.nav-user {
+  border-top: none !important;
+  border-bottom: none !important;
+  background: var(--bg-secondary) !important;
+}
+
+.client-nav .nav-link {
+  color: var(--text-secondary) !important;
+  transition: color 0.2s ease;
+  border: none !important;
+}
+
+.client-nav .nav-link:hover {
+  color: var(--text-primary) !important;
+}
+
+.client-nav .theme-toggle {
+  background: none;
+  border: 2px solid var(--text-primary);
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  margin: 0 5px;
+  border-radius: 4px;
+}
+
+.client-nav .theme-toggle:hover {
+  transform: scale(1.1);
+  background-color: var(--bg-tertiary);
+}
+
+/* Cards */
+.card {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 1px 3px var(--card-shadow);
+  transition: background-color 0.3s ease;
+}
+
+.card-header {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.card-body {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Forms */
+.form-control,
+.form-select {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Labels */
+.form-label {
+  color: var(--text-primary) !important;
+}
+
+/* Alerts */
+.alert {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.alert-danger {
+  background-color: #5a2c2c !important;
+  border-color: #8b0000 !important;
+  color: #ffcccc !important;
+}
+
+.alert-success {
+  background-color: #2c5a2c !important;
+  border-color: #228b22 !important;
+  color: #ccffcc !important;
+}
+
+.alert-info {
+  background-color: #2c5a8b !important;
+  border-color: #0066cc !important;
+  color: #ccddff !important;
+}
+
+/* Tables */
+.table {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.table thead th {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.table tbody tr {
+  border-color: var(--border-color) !important;
+  background-color: var(--card-bg) !important;
+}
+
+.table tbody tr:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-info,
+.btn-warning {
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.btn-danger:hover,
+.btn-info:hover,
+.btn-warning:hover {
+  opacity: 0.8;
+}
+
+/* Modal */
+.modal-content {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.modal-header {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.modal-body {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.modal-footer {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.close,
+.btn-close {
+  color: var(--text-primary) !important;
+}
+
+/* Text utilities */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.text-light {
+  color: var(--text-primary) !important;
+}
+
+.text-white {
+  color: var(--text-primary) !important;
+}
+
+.bg-light {
+  background-color: var(--bg-secondary) !important;
+}
+
+.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+/* Badges */
+.badge {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Dropdown */
+.dropdown-menu {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+.dropdown-item {
+  color: var(--text-primary) !important;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Spinner */
+.spinner-border {
+  border-color: var(--border-color) !important;
+  border-right-color: var(--text-primary) !important;
+}
+
+/* General text and backgrounds */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+}
+
+p, span, li, a {
+  color: var(--text-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--bg-primary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Menu and Panier specific */
+.menu-container,
+.panier-container,
+.scanner-container {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.menu-item,
+.panier-item {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Force override: remove any top/bottom borders on navbar items in dark theme (more specific) */
+html[data-theme="dark"] .nav-links,
+html[data-theme="dark"] .nav-user,
+html.dark-mode .nav-links,
+html.dark-mode .nav-user,
+.client-nav html[data-theme="dark"] .nav-links,
+.client-nav html.dark-mode .nav-links {
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  background: var(--bg-secondary) !important;
+}
+
+@media (max-width: 992px) {
+  html[data-theme="dark"] .nav-links,
+  html[data-theme="dark"] .nav-user {
+    border-top: none !important;
+    border-bottom: none !important;
+  }
+}
+
+/* Extremely specific override for Bootstrap nav border utility seen in DevTools */
+html[data-theme="dark"] nav.border-bottom.navbar.navbar-expand-lg.navbar-light.bg-light.sticky-top,
+html.dark-mode nav.border-bottom.navbar.navbar-expand-lg.navbar-light.bg-light.sticky-top {
+  border-bottom: none !important;
+  border-top: none !important;
+  background-color: var(--bg-secondary) !important;
+  box-shadow: none !important;
+}
+
+/* Also target shorter class combinations just in case */
+html[data-theme="dark"] nav.border-bottom.navbar,
+html.dark-mode nav.border-bottom.navbar {
+  border-bottom: none !important;
+  border-top: none !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Ensure any Bootstrap .bg-light within the navbar uses the dark theme color */
+html[data-theme="dark"] nav.bg-light,
+html[data-theme="dark"] .navbar-light.bg-light,
+html.dark-mode nav.bg-light,
+html.dark-mode .navbar-light.bg-light {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Target brand/containers inside navbar to match dark background */
+html[data-theme="dark"] .navbar .container-fluid,
+html[data-theme="dark"] .navbar .container,
+html.dark-mode .navbar .container-fluid,
+html.dark-mode .navbar .container {
+  background-color: transparent !important;
+}

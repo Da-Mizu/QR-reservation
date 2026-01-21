@@ -4,12 +4,14 @@ import Scanner from './components/Scanner';
 import Menu from './components/Menu';
 import Panier from './components/Panier';
 import Confirmation from './components/Confirmation';
+import Header from './components/Header';
 import './App.css';
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <Header />
         <Routes>
           <Route path="/" element={<Scanner />} />
           <Route path="/menu" element={<Menu />} />
